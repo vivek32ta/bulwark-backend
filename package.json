@@ -9,9 +9,21 @@
     "web3": "^1.2.7"
   },
   "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+	"scripts": {
+    "ganache": "ganache-cli --networkId $npm_package_config_ganache_networkID --allowUnlimitedContractSize --gasLimit $npm_package_config_ganache_gasLimit --gasPrice $npm_package_config_ganache_gasPrice --mnemonic \"$MNEMONIC\"",
+    "migrate": "rm -rf build && truffle migrate --reset --compile-all --network development",
+
+    "start": "concurrently \"npm run ganache\" \"npm run migrate\"",
+    "linux:start": "concurrently \"npm run ganache > ganache-output\" \"npm run migrate && npm run linux:initialize\"",
+    "linux:initialize": "sh initialize.sh"
+	},
+	"config": {
+		"ganache": {
+			"networkID": 3431,
+			"gasPrice": 25000000000,
+			"gasLimit": 6500000
+		}
+	},
   "author": "Vivek",
   "license": "ISC"
 }
