@@ -1,29 +1,37 @@
 {
-  "name": "bulwark-backend",
-  "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
-  "dependencies": {
-    "express": "^4.17.1",
-    "fs": "^0.0.1-security",
-    "web3": "^1.2.7"
-  },
-  "devDependencies": {},
-	"scripts": {
-    "ganache": "ganache-cli --networkId $npm_package_config_ganache_networkID --allowUnlimitedContractSize --gasLimit $npm_package_config_ganache_gasLimit --gasPrice $npm_package_config_ganache_gasPrice --mnemonic \"$MNEMONIC\"",
-    "migrate": "rm -rf build && truffle migrate --reset --compile-all --network development",
+ "name": "bulwark-backend",
+ "version": "1.0.0",
+ "description": "",
+ "main": "app.js",
+ "dependencies": {
+  "bcryptjs": "^2.4.3",
+  "express": "^4.17.1",
+  "fs": "^0.0.1-security",
+  "web3": "^1.2.7"
+ },
+ "devDependencies": {
+  "concurrently": "^5.2.0",
+  "nodemon": "^2.0.3"
+ },
+ "scripts": {
+  "ganache": "ganache-cli --networkId $npm_package_config_ganache_networkID --allowUnlimitedContractSize --gasLimit $npm_package_config_ganache_gasLimit --gasPrice $npm_package_config_ganache_gasPrice --mnemonic \"$MNEMONIC\"",
+  "migrate": "rm -rf build && truffle migrate --reset --compile-all --network development",
 
-    "start": "concurrently \"npm run ganache\" \"npm run migrate\"",
-    "linux:start": "concurrently \"npm run ganache > ganache-output\" \"npm run migrate && npm run linux:initialize\"",
-    "linux:initialize": "sh initialize.sh"
-	},
-	"config": {
-		"ganache": {
-			"networkID": 3431,
-			"gasPrice": 25000000000,
-			"gasLimit": 6500000
-		}
-	},
-  "author": "Vivek",
-  "license": "ISC"
+  "blockchain:start": "concurrently \"npm run ganache\" \"npm run migrate\"",
+  "linux:blockchain:start": "concurrently \"npm run ganache > ganache-output\" \"npm run migrate && npm run linux:blockchain:initialize\"",
+  "linux:blockchain:initialize": "sh initialize.sh",
+  "server:start": "nodemon app.js",
+
+  "bulwark:start": "concurrently \"npm run blockchain:start\" \"npm run server:start\"",
+  "linux:bulwark:start": "concurrently \"npm run linux:blockchain:start\" \"npm run server:start\""
+ },
+ "config": {
+  "ganache": {
+   "networkID": 3431,
+   "gasPrice": 25000000000,
+   "gasLimit": 6500000
+  }
+ },
+ "author": "Vivek",
+ "license": "ISC"
 }
