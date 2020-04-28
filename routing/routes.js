@@ -4,7 +4,6 @@ Web3 = require('web3');
 fs = require("fs");
 
 abiFile= __dirname+'/Insurance_sol_CarInsurance.abi'
-console.log(abiFile)
 
 //Policy Premium Value
 const amount = 1e17;
@@ -15,7 +14,7 @@ abi = JSON.parse(fs.readFileSync(abiFile).toString())
 contract = new web3.eth.Contract(abi)
 
 //Update the contract address here.
-contract.options.address = "0xd004e8bd5AC96E51D5B367f0528D8ddc407F36CB";
+contract.options.address = "0x5300F42289c40864349c694be89595FE4c8d51FB";
 
 
 // Routing Code

@@ -21,7 +21,7 @@ router.post('/login', (req, res) => {
 			user = data.split('\n').filter(line => line.match(re))
 
 			if(user.length === 0)
-				return res.json({err: 'User not found.'})
+				return res.status(500).json({err: 'User not found.'})
 
 			user = user[0]
 			const hash = user.split(' ')[1]
@@ -30,12 +30,12 @@ router.post('/login', (req, res) => {
 		.then(matched => {
 			
 			if(!matched)
-				return res.json({err: 'Wrong password.'})
+				return res.status(500).json({err: 'Wrong password.'})
 
 			user = user.split(' ')
 			res.json({user})
 		})
-		.catch(err => console.log(err) && res.json({err: 'Issues with DB. Check bulwark console.'}))
+		.catch(err => console.log(err) && res.status(500).json({err: 'Issues with DB. Check bulwark console.'}))
 })
 
 router.post('/new', (req, res) => {
@@ -47,7 +47,7 @@ router.post('/new', (req, res) => {
 
 			const re = new RegExp(`${email} `, 'g')
 			if(userData.match(re))
-				return res.json({err: 'User already exists.'})
+				return res.status(500).json({err: 'User already exists.'})
 
 			return fs.promises.readFile(ADDR_PATH, 'utf8')			
 		})
@@ -66,7 +66,7 @@ router.post('/new', (req, res) => {
 				})
 				.then(() => res.json({msg: 'Successfully registered.'}))
 		})
-		.catch(err => console.log(err) && res.json({err: 'Issues with database. Check bulwark console.'}))
+		.catch(err => console.log(err) && res.status(500).json({err: 'Issues with database. Check bulwark console.'}))
 })
 
 module.exports = router
