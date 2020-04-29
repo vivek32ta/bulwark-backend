@@ -1,7 +1,8 @@
 
 const bodyParser = require('body-parser')
 const cors = require('cors')
-const express = require("express")
+const express = require('express')
+const path = require('path')
 
 const app = express()
 app.use(cors())
@@ -15,6 +16,13 @@ const userRoutes = require("./routing/user")
 
 app.use('/', router)
 app.use('/user', userRoutes)
+
+// interface
+app.get('/', (req, res) => {
+	app.use(express.static('build/interface'))
+	res.sendFile(path.resolve(__dirname, 'build', 'interface','index.html'))
+})
+  
 
 
 // listen

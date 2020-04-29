@@ -14,7 +14,7 @@ deployedContract = new web3.eth.Contract(abi)
 deployedContract.deploy({
   data: bytecode
 }).send({
-  from: '0x54b0380fCe3f2a26539076F54800DB97DD8cC9FC',
+  from: '0x7b699a19fe557E550B34a184ac8B84941B21C146',
   gas: 1500000,
   gasPrice: web3.utils.toWei('0.00003', 'ether')
 }).then((newContractInstance) => {

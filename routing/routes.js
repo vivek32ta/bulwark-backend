@@ -14,7 +14,7 @@ abi = JSON.parse(fs.readFileSync(abiFile).toString())
 contract = new web3.eth.Contract(abi)
 
 //Update the contract address here.
-contract.options.address = "0x6157F854D459cC3345d7c86E3DF0297664A60293";
+contract.options.address = "0x7A68E4e2A36c5d9e5bC460766d23aB82dcB42a8B";
 
 
 // Routing Code

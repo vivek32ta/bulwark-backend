@@ -33,6 +33,21 @@ router.post('/login', (req, res) => {
 				return res.status(500).json({err: 'Wrong password.'})
 
 			user = user.split('---')
+
+			user = {
+				name: user[2],
+				keys: {
+					private: user[4],
+					public: user[5]
+				},
+				wallet: {
+					credits: '85.60',
+					history: []
+				},
+				documents: {
+					license: user[3]
+				}
+			}
 			res.json({user})
 		})
 		.catch(err => console.log(err) && res.status(500).json({err: 'Issues with DB. Check bulwark console.'}))
