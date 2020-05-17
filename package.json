@@ -9,6 +9,7 @@
   "cors": "^2.8.5",
   "express": "^4.17.1",
   "fs": "^0.0.1-security",
+  "mongoose": "^5.9.14",
   "web3": "^1.2.7"
  },
  "devDependencies": {
@@ -18,13 +19,11 @@
  "scripts": {
   "ganache": "ganache-cli --networkId $npm_package_config_ganache_networkID --allowUnlimitedContractSize --gasLimit $npm_package_config_ganache_gasLimit --gasPrice $npm_package_config_ganache_gasPrice --mnemonic \"$MNEMONIC\"",
   "migrate": "rm -rf build && truffle migrate --reset --compile-all --network development",
-  "blockchain:start": "concurrently \"npm run ganache\" \"npm run migrate\"",
-  "linux:blockchain:start": "concurrently \"npm run ganache > ganache-output\" \"npm run migrate && npm run linux:blockchain:initialize\"",
-  "linux:blockchain:initialize": "sh initialize.sh",
-  "server:start": "nodemon app.js",
-  "bulwark:start": "concurrently \"npm run blockchain:start\" \"npm run server:start\"",
-  "linux:bulwark:start": "concurrently \"npm run linux:blockchain:start\" \"npm run linux:database:clean && npm run server:start\"",
-  "linux:database:clean": "rm -rf db/users && touch db/users"
+  "blockchain:start": "concurrently \"npm run ganache > ganache-output\" \"npm run migrate && npm run blockchain:initialize\"",
+  "blockchain:initialize": "bash scripts/blockchain-init.sh",
+  "bulwark:start": "bash scripts/init.sh",
+  "database:clean": "rm -rf db/users && touch db/users",
+  "server:start": "nodemon app.js"
  },
  "config": {
   "ganache": {
