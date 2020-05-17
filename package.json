@@ -9,7 +9,9 @@
   "cors": "^2.8.5",
   "express": "^4.17.1",
   "fs": "^0.0.1-security",
+  "ganache-cli": "^6.9.1",
   "mongoose": "^5.9.14",
+  "truffle": "^5.1.26",
   "web3": "^1.2.7"
  },
  "devDependencies": {
@@ -22,7 +24,7 @@
   "blockchain:start": "concurrently \"npm run ganache > ganache-output\" \"npm run migrate && npm run blockchain:initialize\"",
   "blockchain:initialize": "bash scripts/blockchain-init.sh",
   "bulwark:start": "bash scripts/init.sh",
-  "database:clean": "rm -rf db/users && touch db/users",
+  "database:clean": "node scripts/cleanDB.js",
   "server:start": "nodemon app.js"
  },
  "config": {

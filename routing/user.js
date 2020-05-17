@@ -5,88 +5,72 @@ const bcrypt = require('bcryptjs')
 const fs = require('fs')
 const path = require('path')
 
-const DB_PATH = path.resolve(__dirname, '../db/users')
 const ADDR_PATH = path.resolve(__dirname, '../address-and-keys')
+
+// User schema
+const User = require('../models/User')
 
 router.post('/login', (req, res) => {
 
+	let user
 	const {email, password} = req.body
 
-	let user
+	console.log(`[login] ${email}`)
 
-	fs.promises.readFile(DB_PATH, 'utf8')
-		.then(data => {
-
-			const re = new RegExp(`${email}---`, 'g')
-			user = data.split('\n').filter(line => line.match(re))
-
-			if(user.length === 0)
-				return res.status(500).json({err: 'User not found.'})
-
-			user = user[0]
-			const hash = user.split('---')[1]
-			return bcrypt.compare(password, hash)
+	User.findOne({email})
+		.then(_user => {
+			user = _user
+			if(!user) res.status(500).json({err: 'User not found.'}) && console.log(`[login - not found] ${email}`)
+			else return bcrypt.compare(password, user.password)
 		})
 		.then(matched => {
-			
-			if(!matched)
-				return res.status(500).json({err: 'Wrong password.'})
-
-			user = user.split('---')
-
-			user = {
-				name: user[2],
-				keys: {
-					private: user[4],
-					public: user[5]
-				},
-				wallet: {
-					credits: '85.60',
-					history: []
-				},
-				documents: {
-					license: user[3]
-				}
-			}
-			res.json({user})
+			if(!matched) res.status(500).json({err: 'Wrong password.'}) && console.log(`[login - wrong password] ${email}`)
+			else res.json({user}) && console.log(`[login - success] ${email}`)
 		})
-		.catch(err => console.log(err) && res.status(500).json({err: 'Issues with DB. Check bulwark console.'}))
+		.catch(err => console.log(`[login - err] ${email}`) && console.log(err) && res.status(500).json({err: 'Issues with DB. Check bulwark console.'}))
 })
 
 router.post('/new', (req, res) => {
 
+	let hash, updatedData
 	const {email, password, name, license} = req.body
 
-	fs.promises.readFile(DB_PATH, 'utf8')
-		.then(userData => {
+	console.log(`[register - new] ${email}`)
 
-			const re = new RegExp(`${email}---`, 'g')
-			if(userData.match(re)) {
-				res.status(500).json({err: 'User already exists.'})
-				return
-			}
-
-			return fs.promises.readFile(ADDR_PATH, 'utf8')			
+	User.findOne({email})
+		.then(user => {
+			if(user) res.status(500).json({err: 'User already exists.'}) && console.log(`[register - pre-exist] ${email}`)
+			else return bcrypt.genSalt(10)
 		})
-		.then(addrData => {
-
-			if(!addrData)
-				return
-
-			const privateKey = addrData.match(/0x.{64}/)[0]
-			const accountAddr = addrData.match(/0x.{40}/)[0]
-
-			bcrypt.genSalt(10)
-				.then(salt => bcrypt.hash(password, salt))
-				.then(hash => fs.promises.appendFile(DB_PATH, `${email}---${hash}---${name}---${license}---${privateKey}---${accountAddr}\n`))
-				.then(() => fs.promises.readFile(ADDR_PATH, 'utf8'))
-				.then(data => {
-					const newData = data.split('\n').filter(line => !(line.match(privateKey) || line.match(accountAddr))).join('\n')
-					return fs.promises.writeFile(ADDR_PATH, newData)
-				})
-				.then(() => res.json({msg: 'Successfully registered.'}))
+		.then(salt => bcrypt.hash(password, salt))
+		.then(_hash => {
+			hash = _hash
+			return fs.promises.readFile(ADDR_PATH, 'utf8')
 		})
-		.catch(err => console.log(err) && res.status(500).json({err: 'Issues with database. Check bulwark console.'}))
+		.then(data => {
+
+			const private = data.match(/0x.{64}/)[0]
+			const public = data.match(/0x.{40}/)[0]
+			updatedData = data.split('\n').filter(line => !(line.match(private) || line.match(public))).join('\n')
+			
+			return new User({
+				email,
+				password: hash,
+				name,
+				license,
+				keys: {
+					private,
+					public
+				}
+			}).save()
+			
+		})
+		.then(user => {
+			if(!user) res.json({err: 'Issues when trying to save user info. Check bulwark console.'}) && console.log(`[register - save-err] ${email}`)
+			else return fs.promises.writeFile(ADDR_PATH, updatedData)
+		})
+		.then(() => res.json({msg: 'Successfully registered.'}) && console.log(`[register - success] ${email}`))
+		.catch(err => console.log(`[register - err] ${email}`) && console.log(err) && res.status(500).json({err: 'Issues with database. Check bulwark console.'}))
 })
 
 module.exports = router

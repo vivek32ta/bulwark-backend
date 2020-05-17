@@ -1,106 +1,114 @@
-pragma solidity ^0.4.15;
+pragma solidity >=0.5.0 <0.7.0;
+
 
 contract Insurance {
-    function underwrite() public payable ;
-
-    function update(address insuranceTaker) public;
-
-    function isInsured(address insuranceTaker) public constant returns (bool insured);
-
-    function getPremium(address insuranceTaker) public constant returns (uint256 premium);
-
-    // fallback function accepts premium payment for msg.sender;
-    function() public payable {
-        payPremiumFor(msg.sender);
-    }
-
-    function payPremiumFor(address insuranceTaker) public payable;
-
-    function claim() public payable;
-}
-
-contract CarInsurance is Insurance {
+    address payable public contractOwner;
 
     struct InsuranceTaker {
-        bool banned;
+        string name;
+        string vehicleNo;
+        address insuranceTakerAddress;
         bool policyValid;
         uint256 lastPayment;
-        uint256 numAccidents;
+        uint256 premiumNo;
+    }
+
+    constructor() public {
+        //contractOwner will have the address of the account that first deployed the smartContract
+        //in our case the appropriate insurance company
+        contractOwner = msg.sender;
     }
 
     mapping(address => InsuranceTaker) public insuranceTakers;
 
-    uint256 public paymentPeriod = 30 days;
+    //can be annual, half-yearly, quaterly or monthly
+    uint256 public policyPeriod = 30 days;
 
-    uint256 public premiumPerAccident = 0.1 ether;
-
-    uint256 public damagePayment = 1 ether;
-
-    function underwrite() public payable  {
-        InsuranceTaker storage customer = insuranceTakers[msg.sender];
-
-        // do not accept new customers that have been banned previously
-        require(!customer.banned);
-        // Error: "Customer is banned."
-
-        // in order to underwrite the customer needs to pay the first premium upfront
-        require(msg.value == getPremium(msg.sender));
-        // Error: "Couldn't pay first premium"
-        customer.numAccidents = 0;
-        customer.lastPayment = now;
-        customer.policyValid = true;
-    }
-
-    function update(address insuranceTaker) public {
-        // if insurance taker did not pay within required interval they will loose their insurance
-        // and will be banned for future insurance policies
-
-        InsuranceTaker storage customer = insuranceTakers[insuranceTaker];
-
-        if (customer.policyValid && customer.lastPayment + paymentPeriod < now) {
-            customer.policyValid = false;
-            customer.banned = true;
+    function pay() external payable {
+        if (msg.value == getPremium()) {
+            revert("pay the correct premium price");
         }
     }
 
-    // checks if an insurance taker is currently insured
-    function isInsured(address insuranceTaker) public constant returns (bool insured) {
-        InsuranceTaker storage customer = insuranceTakers[insuranceTaker];
-        return customer.policyValid && 
-            !customer.banned &&
-            customer.lastPayment + paymentPeriod >= now;
+    function balanceOf() public view returns (uint256) {
+        return address(this).balance;
     }
 
-    // calculates the premium for an insurance taker
-    function getPremium(address insuranceTaker) public constant returns (uint256 premium) {
-        InsuranceTaker storage customer = insuranceTakers[insuranceTaker];
-        return (customer.numAccidents + 1) * premiumPerAccident;
+    modifier onlyBy() {
+        require(
+            msg.sender == contractOwner,
+            "only contract owner can call this"
+        );
+        _;
     }
 
-    // allows premium to be paid by separate account
-    function payPremiumFor(address insuranceTaker) public payable {
-        InsuranceTaker storage customer = insuranceTakers[insuranceTaker];
-
-        // only accept correct amount
-        require(msg.value == getPremium(insuranceTaker));
-        //Error message: "Incorrect Premium Amount"
-
-        // check if last payment is overdue, if so -> ban
-        update(insuranceTaker);
-
-        // only accept payment from valid insurance takers
-        require(isInsured(insuranceTaker));
-        //Error message: "Customer not yet Insured"
-
-        customer.lastPayment = now;
+    function deposit() public payable onlyBy() {
+        require(
+            msg.value >= 2 ether,
+            "contract needs funds for damage payment"
+        );
     }
 
-    function claim() public payable {
-        require(isInsured(msg.sender));
-        //Error: "Customer not insured"
+    function signUp(string memory _name, string memory _vehicleNo)
+        public
+        payable
+        returns (uint256)
+    {
+        //to check if new insurance taker has enough ether in their account
+        require(msg.sender.balance > 10 ether, "Not enough ether!");
+        //setting the structure variables
         InsuranceTaker storage customer = insuranceTakers[msg.sender];
-        msg.sender.transfer(damagePayment);
-        customer.numAccidents++;
+        customer.name = _name;
+        customer.vehicleNo = _vehicleNo;
+        customer.insuranceTakerAddress = msg.sender;
+        customer.premiumNo = 1;
+        //first premium to be paid upfront
+        //require(msg.value == 0.01 ether,"err1");
+        //contractOwner.transfer(getPremium());
+        require(payPremium(msg.sender), "need to pay first premium upfront");
+        return (200);
     }
 
+    //calculates and returns the premium to be paid by the insurance taker
+    function getPremium() internal pure returns (uint256) {
+        //insuranceTaker customer = insuranceTakers[insuranceTaker];
+        //premiumAmount = 1 ether;
+        return 1 ether;
+    }
+
+    //to check if a insurance taker is currently insured
+    function isInsured(address insuranceTaker) public view returns (bool) {
+        InsuranceTaker storage customer = insuranceTakers[insuranceTaker];
+        return (customer.policyValid &&
+            (customer.lastPayment + policyPeriod >= now));
+    }
+
+    uint256 public damageAmount = 2 ether;
+
+    function payPremium(address insuranceTaker) public payable returns (bool) {
+        InsuranceTaker storage customer = insuranceTakers[insuranceTaker];
+        //require(premiumAmount == getPremium(),"err0");
+        if (customer.premiumNo == 1) {
+            require(msg.value == getPremium(), "err1");
+            customer.policyValid = true;
+            customer.lastPayment = now;
+            customer.premiumNo++;
+        } else {
+            require(isInsured(insuranceTaker), "err2");
+            require(msg.value == getPremium(), "err3");
+            customer.policyValid = true;
+            customer.lastPayment = now;
+        }
+        return true;
+    }
+
+    //claim function
+    function claim() public {
+        require(
+            address(this).balance >= 2 ether,
+            "minimum 2 ether required to refund"
+        );
+        require(isInsured(msg.sender), "sorry signup for the policy first!");
+        msg.sender.transfer(damageAmount);
+    }
 }
