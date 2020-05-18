@@ -3,23 +3,27 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const express = require('express')
 const mongoose = require('mongoose')
+const passport = require('passport')
 const path = require('path')
 
 const app = express()
+
+// CORS support and body-parser
 app.use(cors())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
+// passport authorization
+app.use(passport.initialize())
+require('./config/passport')(passport)
 
 // connect to database
-// connection to database
 mongoose.set('useFindAndModify', false)
 const URI = require('./config/keys.js').mongoURI
 mongoose
   	.connect(URI, {useNewUrlParser: true, useUnifiedTopology: true})
   	.then(() => console.log('Connected to mongoDB.'))
   	.catch(err => console.log(err))
-
 
 // routes
 const router = require("./routing/routes")

@@ -19,28 +19,30 @@ const UserSchema = {
         type: String,
         required: true
     },
-    insurance: [{
+    configured: {
+        type: Boolean,
+        default: false
+    },
+    insurance: {
         type: {
             type: String
         },
         renewed: {
             type: Date
         },
-        expire: {
-            type: Date
+        period: {
+            type: Number
         },
         vehicle: {
             number: String
         }
-    }],
+    },
     keys: {
         private: {
             type: String,
-            required: true
         },
         public: {
             type: String,
-            required: true
         }
     },
     wallet: {

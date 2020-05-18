@@ -1,3 +1,4 @@
 module.exports = {
-    mongoURI: 'still need to set it up.'
+    mongoURI: process.env.mongoURI,
+    SECRET_KEY: process.env.SECRET_KEY
 }
