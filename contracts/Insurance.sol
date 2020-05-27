@@ -19,6 +19,8 @@ contract Insurance {
         contractOwner = msg.sender;
     }
 
+    address public contractAddress = address(this);
+
     mapping(address => InsuranceTaker) public insuranceTakers;
 
     //can be annual, half-yearly, quaterly or monthly
@@ -31,7 +33,7 @@ contract Insurance {
     }
 
     function balanceOf() public view returns (uint256) {
-        return address(this).balance;
+        return contractAddress.balance;
     }
 
     modifier onlyBy() {
@@ -83,8 +85,6 @@ contract Insurance {
             (customer.lastPayment + policyPeriod >= now));
     }
 
-    uint256 public damageAmount = 2 ether;
-
     function payPremium(address insuranceTaker) public payable returns (bool) {
         InsuranceTaker storage customer = insuranceTakers[insuranceTaker];
         //require(premiumAmount == getPremium(),"err0");
@@ -102,13 +102,15 @@ contract Insurance {
         return true;
     }
 
+    uint256 public damageAmount = 2 ether;
+
     //claim function
-    function claim() public {
+    function claim() public payable {
         require(
-            address(this).balance >= 2 ether,
+            contractAddress.balance >= 2e18,
             "minimum 2 ether required to refund"
         );
-        require(isInsured(msg.sender), "sorry signup for the policy first!");
+        require(isInsured(msg.sender),"sorry signup for the policy first!");
         msg.sender.transfer(damageAmount);
     }
 }

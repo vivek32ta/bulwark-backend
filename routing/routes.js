@@ -1,9 +1,11 @@
-const express = require('express');
-const routing = express.Router();
-Web3 = require('web3');
-fs = require("fs");
 
-abiFile= __dirname+'/Insurance_sol_CarInsurance.abi'
+const express = require('express')
+const routing = express.Router()
+Web3 = require('web3')
+fs = require("fs")
+const path = require('path')
+
+abiFile = path.resolve(__dirname, '..' , 'contracts/Insurance_sol_Insurance.abi')
 
 //Policy Premium Value
 const amount = 1e17;
@@ -14,12 +16,10 @@ abi = JSON.parse(fs.readFileSync(abiFile).toString())
 contract = new web3.eth.Contract(abi)
 
 //Update the contract address here.
-contract.options.address = "0x860246096A8EE9d69606233e932714a1821014a1";
+contract.options.address = "0x860246096A8EE9d69606233e932714a1821014a1"
 
 
 // Routing Code
-
-
 routing.get('/underwrite/:accountAddress', (req,res)=>{
     console.log("Routing to underwriting");
     var senderAddress = req.params.accountAddress;

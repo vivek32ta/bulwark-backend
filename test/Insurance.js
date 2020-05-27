@@ -36,15 +36,15 @@ contract('Insurance', function(accounts) {
         assert.equal(contractBalance, 1e+18);
     });
 
-    // it('4.claim without enough ether in SMC must be unsuccessful', async function () {
-    //     try {
-    //         await insurance.claim(accounts[2]);
-    //     } catch(e) {
-    //         assert(e.message.includes('minimum 2 ether required to refund'));
-    //         return;
-    //     }
-    //     assert(false);
-    // });
+    it('4.claim without enough ether in SMC must be unsuccessful', async function () {
+        try {
+            await insurance.claim({from: accounts[2]});
+        } catch(e) {
+            assert(e.message.includes('minimum 2 ether required to refund'));
+            return;
+        }
+        assert(false);
+    });
 
     it('5.deposit from non owner account must be unsuccessful', async function () {
         try {
@@ -94,15 +94,15 @@ contract('Insurance', function(accounts) {
         assert(false);
     });
 
-    // it('10.non insured users cannot process claims', async function () {
-    //     try {
-    //         await insurance.claim({from: accounts[4]});
-    //     } catch(e) {
-    //         assert(e.message.includes('sorry signup for the policy first!'));
-    //         return;
-    //     }
-    //     assert(false);
-    // });
+    it('10.non insured users cannot process claims', async function () {
+        try {
+            await insurance.claim({from: accounts[4]});
+        } catch(e) {
+            assert(e.message.includes('sorry signup for the policy first!'));
+            return;
+        }
+        assert(false);
+    });
 
     it('11.checking if insured user is still insured', async function () {
         var insured = await insurance.isInsured(accounts[2]);
@@ -132,21 +132,21 @@ contract('Insurance', function(accounts) {
 
     });
 
-    // it('14.claim process by insured user must be successful', async function () {
-    //     let contractBalanceBefore = await web3.eth.getBalance(insurance.address);
-    //     let accountBalanceBefore = await web3.eth.getBalance(accounts[2]);
+    it('14.claim process by insured user must be successful', async function () {
+        let contractBalanceBefore = await web3.eth.getBalance(insurance.address);
+        //let accountBalanceBefore = await web3.eth.getBalance(accounts[2]);
 
-    //     await insurance.claim({from: accounts[2]});
+        await insurance.claim({from: accounts[2]});
 
-    //     let contractBalanceAfter = await web3.eth.getBalance(insurance.address);
-    //     let accountBalanceAfter = await web3.eth.getBalance(accounts[2]);
+        let contractBalanceAfter = await web3.eth.getBalance(insurance.address);
+        //let accountBalanceAfter = await web3.eth.getBalance(accounts[2]);
 
-    //     let a = web3.utils.toBN(accountBalanceAfter).toString();
-    //     let c = web3.utils.toBN(accountBalanceBefore).add(web3.utils.toBN(1e18)).toString();
-    //     assert.equal(c, a);
+        // let a = web3.utils.toBN(accountBalanceAfter).toString();
+        // let c = web3.utils.toBN(accountBalanceBefore).add(web3.utils.toBN(2e18)).toString();
+        // assert.equal(c, a);
 
-    //     let x = web3.utils.toBN(contractBalanceBefore).toString();
-    //     let z = web3.utils.toBN(contractBalanceAfter).add(web3.utils.toBN(1e18)).toString();
-    //     assert.equal(z, x);
-    // });
+        let x = web3.utils.toBN(contractBalanceBefore).toString();
+        let z = web3.utils.toBN(contractBalanceAfter).add(web3.utils.toBN(2e18)).toString();
+        assert.equal(z, x);
+    });
 });
