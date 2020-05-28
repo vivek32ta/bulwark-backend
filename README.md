@@ -10,13 +10,17 @@ Request Body (JSON):
 {"customerName":<Customer Name>, "vehicleNo":<Vehicle Number>}
 ````
 
-#### Checking Account Balance: `[GET] /getAccountBalance/<Account Address>`
+#### Checking Account Balance: 
+`[GET] /getAccountBalance/<Account Address>`
 
-#### Is Account Insured: `[GET] /isInsured/<Account Address>`
+#### Is Account Insured: 
+`[GET] /isInsured/<Account Address>`
 
-#### Pay Premium: `[GET] /payPremium/<Account Address>`
+#### Pay Premium: 
+`[GET] /payPremium/<Account Address>`
 
-#### Claim Policy: `[GET] /claim/<Account Address>`
+#### Claim Policy: 
+`[GET] /claim/<Account Address>`
 
 
 
