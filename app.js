@@ -30,6 +30,7 @@ const router = require("./routing/routes")
 const userRoutes = require("./routing/user")
 
 app.use('/', router)
+
 app.use('/user', userRoutes)
 
 // interface
