@@ -1,8 +1,8 @@
 # Bulwark Backend
-
+[Contributors](#developed-by)
 ## REST Enpoints
 
-#### New Policy: 
+#### Creating a New Policy: 
 Request Body (JSON): 
 ```bash
 [POST] /signUp/<Account Address>
