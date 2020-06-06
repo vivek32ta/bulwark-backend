@@ -13,7 +13,6 @@ router.post('/new', passport.authenticate('jwt', {session: false}), (req, res) =
     const {insuranceData} = req.body
     const {insurance, dl} = insuranceData
 	const userID = req.user.user
-
 	console.log(`[new_insurance] ${userID}`)
 
 	User.findById(userID)
@@ -44,16 +43,24 @@ router.post('/new', passport.authenticate('jwt', {session: false}), (req, res) =
                         try {
                             token = await getJwtToken({ user: _user._id, address: _user.keys.public })
                         } catch(err) {
-                            return res.status(500).json({err: '[new_insurance] check bulwark co'})
+                            return res.status(500).json({err: 'check bulwark console'})
                         }
 
                         const user = getResponsePayload(_user, token)
                         res.json({msg: 'Successfully configured.', user})
                         console.log(`[new_insurance - success] ${userID}`)
                     })
-					.catch(err => console.log(err))
+					.catch(err => {
+                        res.status(500).json({err: 'check bulwark console.'})
+                        console.log(`[new_insurance - err] ${userID}`)
+                        console.log(err)
+                    })
+        })
+        .catch(err => {
+			res.status(500).json({err: 'check bulwark console.'})
+			console.log(`[new_insurance - mongo-err] ${userID}`)
+			console.log(err)
 		})
-		.catch(err => console.log(`[new_insurance mongo-err] ${userID}`) && console.log(err) && res.status(500).json({err: '[mongo-err] check bulwark console.'}))
 })
 
 module.exports = router

@@ -9,9 +9,7 @@ const {getJwtToken, getResponsePayload} = require('./routing-helpers.js')
 // routes
 router.post('/login', (req, res) => {
 
-	let user
 	const {email, password} = req.body
-
 	console.log(`[login] ${email}`)
 
 	User.findOne({email})
@@ -47,9 +45,7 @@ router.post('/login', (req, res) => {
 
 router.post('/new', (req, res) => {
 
-	let hash, updatedData
 	const {email, password, name} = req.body
-
 	console.log(`[register - new] ${email}`)
 
 	User.findOne({email})
@@ -65,11 +61,11 @@ router.post('/new', (req, res) => {
 						}).save()
 					)
 					.then(user => {
-						if(!user) res.json({err: '[mongo-err] check bulwark console.'}) && console.log(`[register - save-err] ${email}`)
+						if(!user) res.json({err: 'Could not save. Try again later.'}) && console.log(`[register - save-err] ${email}`)
 						else res.json({msg: 'Successfully registered.'}) && console.log(`[register - success] ${email}`)
 					})
 					.catch(err => {
-						res.status(500).json({err: '[err] check bulwark console.'})
+						res.status(500).json({err: 'check bulwark console.'})
 						console.log(`[register - err] ${email}`)
 						console.log(err)
 					})

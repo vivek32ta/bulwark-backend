@@ -3,14 +3,13 @@ const jwt = require('jsonwebtoken')
 
 const SECRET_KEY = require('../config/keys').SECRET_KEY
 
-const getJwtToken = payload => {
-    return new Promise(function(resolve, reject) {
+const getJwtToken = payload =>
+    new Promise(function(resolve, reject) {
         jwt.sign(payload, SECRET_KEY, (err, token) => {
             if(err) reject(err)
             else resolve(token)
         })
     })
-}
 
 const getResponsePayload = (user, token) => {
     const temp = {...user._doc}

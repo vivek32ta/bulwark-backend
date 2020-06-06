@@ -14,7 +14,7 @@ const abi = JSON.parse(fs.readFileSync(abiFile).toString())
 const contract = new web3.eth.Contract(abi)
 
 //Update the contract address here.
-contract.options.address = "0x9dD1f7FEA778cb74948c0ce0f73c38612E2f3DEc"
+contract.options.address = "0x1efb58C06149090795dA60088E1E0cF29Ff0517C"
 
 
 // Get Account Balance
