@@ -22,7 +22,7 @@ routing.get('/getAccountBalance', passport.authenticate('jwt', {session: false})
 
     const userID = req.user.user
     const accountAddress = req.user.address
-    console.log(`[balance check] ${userID} -- ${accountAddress}`)
+    console.log(`[balance_check] ${userID} -- ${accountAddress}`)
 
     if(!accountAddress) return res.json({err: 'User not registered on Bulwark.'})
 
@@ -31,7 +31,7 @@ routing.get('/getAccountBalance', passport.authenticate('jwt', {session: false})
             if(accountAddress && allAccounts.includes(accountAddress))
                 web3.eth.getBalance(accountAddress)
                     .then(bal => { 
-                        console.log(`[balance check] ${userID} -- ${accountAddress}`, web3.utils.fromWei(bal)) 
+                        console.log(`[balance_check] ${userID} -- ${accountAddress}`, web3.utils.fromWei(bal)) 
                         res.json({
                             account: accountAddress,
                             balance: web3.utils.fromWei(bal)
@@ -39,15 +39,15 @@ routing.get('/getAccountBalance', passport.authenticate('jwt', {session: false})
                     })
                     .catch(err => {
                         res.status(500).json({err: 'check bulwark console.'})
-                        console.log(`[bulwark register] ${userID} -- ${accountAddress} contract-err`)
+                        console.log(`[balance_check] ${userID} -- ${accountAddress} contract-err`)
                         console.log(err)
                     })
-            else console.log(`[balance check] ${userID} -- ${accountAddress} - Invalid Account Address`)
+            else console.log(`[balance_check] ${userID} -- ${accountAddress} - Invalid Account Address`)
                 && res.status(403).json({err: 'Invalid Account Address'})
         })
         .catch(err => {
             res.status(500).json({err: 'check bulwark console.'})
-            console.log(`[bulwark register] ${userID} -- ${accountAddress} contract-err`)
+            console.log(`[balance_check] ${userID} -- ${accountAddress} contract-err`)
             console.log(err)
         })
 })
@@ -57,7 +57,7 @@ routing.get('/isInsured', passport.authenticate('jwt', {session: false}), (req, 
 
     const userID = req.user.user
     const accountAddress = req.user.address
-    console.log(`[insurance check] ${userID} -- ${accountAddress}`)
+    console.log(`[insurance_check] ${userID} -- ${accountAddress}`)
 
     if(!accountAddress) return res.json({err: 'User not registered on Bulwark.'})
 
@@ -67,20 +67,20 @@ routing.get('/isInsured', passport.authenticate('jwt', {session: false}), (req, 
                 contract.methods.isInsured(accountAddress)
                     .call()
                     .then(f => {
-                        console.log(`[insurance check] ${userID} -- ${accountAddress} isInsured: ${f}`)
+                        console.log(`[insurance_check] ${userID} -- ${accountAddress} isInsured: ${f}`)
                         res.json({ isInsured: f })
                     })
                     .catch(err => {
                         res.status(500).json({err: 'check bulwark console.'})
-                        console.log(`[bulwark register] ${userID} -- ${accountAddress} contract-err`)
+                        console.log(`[insurance_check] ${userID} -- ${accountAddress} contract-err`)
                         console.log(err)
                     })
-            else console.log(`[insurance check] ${userID} -- ${accountAddress} - Invalid Account Address`)
+            else console.log(`[insurance_check] ${userID} -- ${accountAddress} - Invalid Account Address`)
                 && res.status(403).json({'error':'Invalid Account Address'})
         })
         .catch(err => {
             res.status(500).json({err: 'check bulwark console.'})
-            console.log(`[bulwark register] ${userID} -- ${accountAddress} contract-err`)
+            console.log(`[insurance_check] ${userID} -- ${accountAddress} contract-err`)
             console.log(err)
         })
 
@@ -95,7 +95,7 @@ routing.post('/signUp', passport.authenticate('jwt', {session: false}), (req, re
     const vehicleNo = req.body.vehicleNo
     const userID = req.user.user
     const accountAddress = req.user.address
-    console.log(`[bulwark register] ${userID} -- ${accountAddress}`)
+    console.log(`[bulwark_register] ${userID} -- ${accountAddress}`)
 
     if(!accountAddress) return res.json({err: 'User not registered on Bulwark.'})
     console.log("Underwrititng a new policy")
@@ -114,15 +114,15 @@ routing.post('/signUp', passport.authenticate('jwt', {session: false}), (req, re
                     })
                     .catch(err => {
                         res.status(500).json({err: 'check bulwark console.'})
-                        console.log(`[bulwark register] ${userID} -- ${accountAddress} contract-err`)
+                        console.log(`[bulwark_register] ${userID} -- ${accountAddress} contract-err`)
                         console.log(err)
                     })
-            else console.log(`[insurance check] ${userID} -- ${accountAddress} - Invalid Account Address`)
+            else console.log(`[bulwark_register] ${userID} -- ${accountAddress} - Invalid Account Address`)
                 && res.status(403).json({'error':'Invalid Account Address'})
         })
         .catch(err => {
             res.status(500).json({err: 'check bulwark console.'})
-            console.log(`[bulwark register] ${userID} -- ${accountAddress} contract-err`)
+            console.log(`[bulwark_register] ${userID} -- ${accountAddress} contract-err`)
             console.log(err)
         })
 })
@@ -132,7 +132,7 @@ routing.get('/payPremium', passport.authenticate('jwt', {session: false}), (req,
 
     const userID = req.user.user
     const accountAddress = req.user.address
-    console.log(`[paying premium] ${userID} -- ${accountAddress}`)
+    console.log(`[paying_premium] ${userID} -- ${accountAddress}`)
 
     if(!accountAddress) return res.json({err: 'User not registered on Bulwark.'})
     console.log("Paying Premium")
@@ -151,15 +151,15 @@ routing.get('/payPremium', passport.authenticate('jwt', {session: false}), (req,
                     })
                     .catch(err => {
                         res.status(500).json({err: 'check bulwark console.'})
-                        console.log(`[bulwark register] ${userID} -- ${accountAddress} contract-err`)
+                        console.log(`[paying_premium] ${userID} -- ${accountAddress} contract-err`)
                         console.log(err)
                     })
             else res.status(403).json({'error':'Invalid Account Address'})
-                && console.log(`[paying premium] ${userID} -- ${accountAddress} - Invalid Account Address`)
+                && console.log(`[paying_premium] ${userID} -- ${accountAddress} - Invalid Account Address`)
         })
         .catch(err => {
             res.status(500).json({err: 'check bulwark console.'})
-            console.log(`[bulwark register] ${userID} -- ${accountAddress} contract-err`)
+            console.log(`[paying_premium] ${userID} -- ${accountAddress} contract-err`)
             console.log(err)
         })
 })
@@ -169,12 +169,10 @@ routing.get('/claim', passport.authenticate('jwt', {session: false}), (req, res)
 
     const userID = req.user.user
     const accountAddress = req.user.address
-    console.log(`[processing claim] ${userID} -- ${accountAddress}`)
+    console.log(`[processing_claim] ${userID} -- ${accountAddress}`)
 
     if(!accountAddress) return res.json({err: 'User not registered on Bulwark.'})
-    console.log("Routing to claim")
-    
-    console.log("Claiming Insurance")
+
     web3.eth.getAccounts()
         .then(allAccounts => {
             if(accountAddress && allAccounts.includes(accountAddress))
@@ -186,15 +184,15 @@ routing.get('/claim', passport.authenticate('jwt', {session: false}), (req, res)
                 })
                 .catch(err => {
                     res.status(500).json({err: 'check bulwark console.'})
-                    console.log(`[bulwark register] ${userID} -- ${accountAddress} contract-err`)
+                    console.log(`[processing_claim] ${userID} -- ${accountAddress} contract-err`)
                     console.log(err)
                 })
             else res.status(403).json({'error':'Invalid Account Address'})
-                && console.log(`[processing claim] ${userID} -- ${accountAddress} - Invalid Account Address`)
+                && console.log(`[processing_claim] ${userID} -- ${accountAddress} - Invalid Account Address`)
         })
         .catch(err => {
             res.status(500).json({err: 'check bulwark console.'})
-            console.log(`[bulwark register] ${userID} -- ${accountAddress} contract-err`)
+            console.log(`[processing_claim] ${userID} -- ${accountAddress} contract-err`)
             console.log(err)
         })
 })
