@@ -23,8 +23,8 @@
  },
  "scripts": {
   "ganache": "ganache-cli --networkId $npm_package_config_ganache_networkID --allowUnlimitedContractSize --gasLimit $npm_package_config_ganache_gasLimit --gasPrice $npm_package_config_ganache_gasPrice --mnemonic \"$MNEMONIC\"",
-  "migrate": "rm -rf build && truffle migrate --reset --compile-all --network development",
-  "blockchain:start": "concurrently \"npm run ganache > ganache-output\" \"npm run migrate && npm run blockchain:initialize\"",
+  "migrate": "rm -rf build && truffle migrate --reset --compile-all --network ganache",
+  "blockchain:start": "concurrently \"npm run ganache > bulwark-data/ganache-output\" \"npm run migrate && npm run blockchain:initialize\"",
   "blockchain:initialize": "bash scripts/blockchain-init.sh",
   "bulwark:start": "bash scripts/init.sh",
   "database:clean": "node scripts/cleanDB.js",

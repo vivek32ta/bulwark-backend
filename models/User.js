@@ -1,6 +1,5 @@
 
 const mongoose = require('mongoose')
-const Schema = mongoose.Schema
 
 const UserSchema = {
     email: {
@@ -15,17 +14,24 @@ const UserSchema = {
         type: String,
         required: true
     },
-    license: {
-        type: String,
-        required: true
+    dl: {
+        type: String
     },
     configured: {
         type: Boolean,
         default: false
     },
     insurance: {
-        type: {
-            type: String
+        vehicle: {
+            name: {
+                type: String
+            },
+            type: {
+                type: String
+            },
+            number: {
+                type: String
+            }
         },
         renewed: {
             type: Date
@@ -33,9 +39,6 @@ const UserSchema = {
         period: {
             type: Number
         },
-        vehicle: {
-            number: String
-        }
     },
     keys: {
         private: {

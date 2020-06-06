@@ -28,10 +28,12 @@ mongoose
 // routes
 const router = require("./routing/routes")
 const userRoutes = require("./routing/user")
+const insuranceRoutes = require("./routing/insurance")
 
 app.use('/', router)
 
 app.use('/user', userRoutes)
+app.use('/insurance', insuranceRoutes)
 
 // interface
 app.get('/', (req, res) => {
