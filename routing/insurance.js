@@ -12,7 +12,7 @@ router.post('/new', passport.authenticate('jwt', {session: false}), (req, res) =
 
     const {insuranceData} = req.body
     const {insurance, dl} = insuranceData
-	const userID = req.user
+	const userID = req.user.user
 
 	console.log(`[new_insurance] ${userID}`)
 
@@ -42,7 +42,7 @@ router.post('/new', passport.authenticate('jwt', {session: false}), (req, res) =
 					.then(async _user => {
                         let token
                         try {
-                            token = getJwtToken({ user: _user._id })
+                            token = getJwtToken({ user: _user._id, address: _user.keys.public })
                         } catch(err) {
                             return res.status(500).json({err: '[new_insurance] check bulwark co'})
                         }

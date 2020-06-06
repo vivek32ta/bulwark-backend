@@ -17,7 +17,7 @@ module.exports = passport => {
 
     User.findById(user)
         .then(user => {
-            if(user) done(null, user.id)
+            if(user) done(null, jwtPayload)
             else done(null, false)
         })
         .catch(dbErr => console.log(dbErr))

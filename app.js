@@ -26,14 +26,13 @@ mongoose
   	.catch(err => console.log(err))
 
 // routes
-const router = require("./routing/routes")
-const userRoutes = require("./routing/user")
+const bulwarkRoutes = require("./routing/bulwark")
 const insuranceRoutes = require("./routing/insurance")
+const userRoutes = require("./routing/user")
 
-app.use('/', router)
-
-app.use('/user', userRoutes)
+app.use('/bulwark', bulwarkRoutes)
 app.use('/insurance', insuranceRoutes)
+app.use('/user', userRoutes)
 
 // interface
 app.get('/', (req, res) => {
@@ -41,7 +40,6 @@ app.get('/', (req, res) => {
 	res.sendFile(path.resolve(__dirname, 'build', 'interface','index.html'))
 })
   
-
 
 // listen
 const PORT = process.env.PORT || 5000
