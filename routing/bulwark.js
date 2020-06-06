@@ -28,7 +28,7 @@ routing.get('/getAccountBalance', passport.authenticate('jwt', {session: false})
 
     web3.eth.getAccounts()
         .then(allAccounts =>{
-            if(accountAddress !== null && allAccounts.includes(accountAddress))
+            if(accountAddress && allAccounts.includes(accountAddress))
                 web3.eth.getBalance(accountAddress)
                     .then(bal => { 
                         console.log(`[balance check] ${userID} -- ${accountAddress}`, web3.utils.fromWei(bal)) 
@@ -37,15 +37,23 @@ routing.get('/getAccountBalance', passport.authenticate('jwt', {session: false})
                             balance: web3.utils.fromWei(bal)
                         }) 
                     })
-                    .catch(err => res.status(500).json({err: 'check bulwark console.'}) && console.log(`[balance check] ${userID} -- ${accountAddress} - web3-err`) && console.log(err))
+                    .catch(err => {
+                        res.status(500).json({err: 'check bulwark console.'})
+                        console.log(`[bulwark register] ${userID} -- ${accountAddress} contract-err`)
+                        console.log(err)
+                    })
             else console.log(`[balance check] ${userID} -- ${accountAddress} - Invalid Account Address`)
                 && res.status(403).json({err: 'Invalid Account Address'})
         })
-        .catch(err => res.status(500).json({err: 'check bulwark console.'}) && console.log(`[balance check] ${userID} -- ${accountAddress} - web3-err`) && console.log(err))
+        .catch(err => {
+            res.status(500).json({err: 'check bulwark console.'})
+            console.log(`[bulwark register] ${userID} -- ${accountAddress} contract-err`)
+            console.log(err)
+        })
 })
 
 //Route Example (GET): http://localhost:5000/isInsured/<Account Address>
-routing.get('/isInsured/:accountAddress', passport.authenticate('jwt', {session: false}), (req, res) => {
+routing.get('/isInsured', passport.authenticate('jwt', {session: false}), (req, res) => {
 
     const userID = req.user.user
     const accountAddress = req.user.address
@@ -55,18 +63,26 @@ routing.get('/isInsured/:accountAddress', passport.authenticate('jwt', {session:
 
     web3.eth.getAccounts()
         .then(allAccounts => {
-            if(accountAddress !== null && allAccounts.includes(accountAddress))
+            if(accountAddress && allAccounts.includes(accountAddress))
                 contract.methods.isInsured(accountAddress)
                     .call()
                     .then(f => {
                         console.log(`[insurance check] ${userID} -- ${accountAddress} isInsured: ${f}`)
                         res.json({ isInsured: f })
                     })
-                    .catch(err => res.status(500).json({err: 'check bulwark console.'}) && console.log(`[insurance check] ${userID} -- ${accountAddress} web3-err`) && console.log(err))
+                    .catch(err => {
+                        res.status(500).json({err: 'check bulwark console.'})
+                        console.log(`[bulwark register] ${userID} -- ${accountAddress} contract-err`)
+                        console.log(err)
+                    })
             else console.log(`[insurance check] ${userID} -- ${accountAddress} - Invalid Account Address`)
                 && res.status(403).json({'error':'Invalid Account Address'})
         })
-        .catch(err => res.status(500).json({err: 'check bulwark console.'}) && console.log(`[insurance check] ${userID} -- ${accountAddress} web3-err`) && console.log(err))
+        .catch(err => {
+            res.status(500).json({err: 'check bulwark console.'})
+            console.log(`[bulwark register] ${userID} -- ${accountAddress} contract-err`)
+            console.log(err)
+        })
 
 })
 
@@ -74,8 +90,9 @@ routing.get('/isInsured/:accountAddress', passport.authenticate('jwt', {session:
 Route Example (POST): http://localhost:5000/signUp/<Account Address>
 JSON Body: {"customerName":<Customer Name>, "vehicleNo":<Vehicle Number>}
 */
-routing.post('/signUp/:accountAddress', passport.authenticate('jwt', {session: false}), (req, res) => {
+routing.post('/signUp', passport.authenticate('jwt', {session: false}), (req, res) => {
 
+    const vehicleNo = req.body.vehicleNo
     const userID = req.user.user
     const accountAddress = req.user.address
     console.log(`[bulwark register] ${userID} -- ${accountAddress}`)
@@ -85,25 +102,33 @@ routing.post('/signUp/:accountAddress', passport.authenticate('jwt', {session: f
 
     web3.eth.getAccounts()
         .then(allAccounts => {
-            if(accountAddress !== null && allAccounts.includes(accountAddress))
+            if(accountAddress && allAccounts.includes(accountAddress))
                 contract.methods.signUp(userID, vehicleNo)
                     .send({from: accountAddress,
-                            value: web3.utils.toWei('1','ether'),
+                            value: web3.utils.toWei('1', 'ether'),
                             gas: 210000
                         })
                     .then(receipt => {
                         console.log(receipt)
                         res.json(receipt)
                     })
-                    .catch(err => res.status(500).json({err: 'check bulwark console.'}) && console.log(`[bulwark register] ${userID} -- ${accountAddress} web3-err`) && console.log(err))
+                    .catch(err => {
+                        res.status(500).json({err: 'check bulwark console.'})
+                        console.log(`[bulwark register] ${userID} -- ${accountAddress} contract-err`)
+                        console.log(err)
+                    })
             else console.log(`[insurance check] ${userID} -- ${accountAddress} - Invalid Account Address`)
                 && res.status(403).json({'error':'Invalid Account Address'})
         })
-        .catch(err => res.status(500).json({err: 'check bulwark console.'}) && console.log(`[bulwark register] ${userID} -- ${accountAddress} web3-err`) && console.log(err))
+        .catch(err => {
+            res.status(500).json({err: 'check bulwark console.'})
+            console.log(`[bulwark register] ${userID} -- ${accountAddress} contract-err`)
+            console.log(err)
+        })
 })
 
 //Route Example (GET): http://localhost:5000/payPremium/<Account Address>
-routing.get('/payPremium/:accountAddress/', passport.authenticate('jwt', {session: false}), (req, res) => {
+routing.get('/payPremium', passport.authenticate('jwt', {session: false}), (req, res) => {
 
     const userID = req.user.user
     const accountAddress = req.user.address
@@ -114,7 +139,7 @@ routing.get('/payPremium/:accountAddress/', passport.authenticate('jwt', {sessio
 
     web3.eth.getAccounts()
         .then(allAccounts => {
-            if(accountAddress !== null && allAccounts.includes(accountAddress))
+            if(accountAddress && allAccounts.includes(accountAddress))
                 contract.methods.payPremium(accountAddress)
                     .send({
                         from: accountAddress,
@@ -124,15 +149,23 @@ routing.get('/payPremium/:accountAddress/', passport.authenticate('jwt', {sessio
                         console.log(receipt)
                         res.json(receipt)
                     })
-                    .catch(err => res.status(500).json({err: 'check bulwark console.'}) && console.log(`[paying premium] ${userID} -- ${accountAddress} web3-err`) && console.log(err))
+                    .catch(err => {
+                        res.status(500).json({err: 'check bulwark console.'})
+                        console.log(`[bulwark register] ${userID} -- ${accountAddress} contract-err`)
+                        console.log(err)
+                    })
             else res.status(403).json({'error':'Invalid Account Address'})
                 && console.log(`[paying premium] ${userID} -- ${accountAddress} - Invalid Account Address`)
         })
-        .catch(err => res.status(500).json({err: 'check bulwark console.'}) && console.log(`[paying premium] ${userID} -- ${accountAddress} web3-err`) && console.log(err))
+        .catch(err => {
+            res.status(500).json({err: 'check bulwark console.'})
+            console.log(`[bulwark register] ${userID} -- ${accountAddress} contract-err`)
+            console.log(err)
+        })
 })
 
 //Route Example (GET): http://localhost:5000/claim/<Account Address>
-routing.get('/claim/:accountAddress', passport.authenticate('jwt', {session: false}), (req, res) => {
+routing.get('/claim', passport.authenticate('jwt', {session: false}), (req, res) => {
 
     const userID = req.user.user
     const accountAddress = req.user.address
@@ -144,18 +177,26 @@ routing.get('/claim/:accountAddress', passport.authenticate('jwt', {session: fal
     console.log("Claiming Insurance")
     web3.eth.getAccounts()
         .then(allAccounts => {
-            if(accountAddress !== null && allAccounts.includes(accountAddress))
+            if(accountAddress && allAccounts.includes(accountAddress))
                 contract.methods.claim()
                 .send({from: accountAddress})
                 .then(receipt => {
                     console.log(receipt)
                     res.json(receipt)
                 })
-                .catch(err => res.status(500).json({err: 'check bulwark console.'}) && console.log(`[processing claim] ${userID} -- ${accountAddress} web3-err`) && console.log(err))
+                .catch(err => {
+                    res.status(500).json({err: 'check bulwark console.'})
+                    console.log(`[bulwark register] ${userID} -- ${accountAddress} contract-err`)
+                    console.log(err)
+                })
             else res.status(403).json({'error':'Invalid Account Address'})
                 && console.log(`[processing claim] ${userID} -- ${accountAddress} - Invalid Account Address`)
         })
-        .catch(err => res.status(500).json({err: 'check bulwark console.'}) && console.log(`[processing claim] ${userID} -- ${accountAddress} web3-err`) && console.log(err))
+        .catch(err => {
+            res.status(500).json({err: 'check bulwark console.'})
+            console.log(`[bulwark register] ${userID} -- ${accountAddress} contract-err`)
+            console.log(err)
+        })
 })
 
 

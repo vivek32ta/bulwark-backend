@@ -29,7 +29,7 @@ router.post('/login', (req, res) => {
 							}
 
 							const user = getResponsePayload(_user, token)
-							res.json({user})
+							res.json({user}) && console.log(`[login - success] ${email}`)
 						}
 					})
 					.catch(err => {
