@@ -7,6 +7,7 @@ const router = express.Router()
 const User = require('../models/User')
 const {	getJwtToken
 	  , getResponsePayload } = require('./routing-helpers.js')
+const {	getAccountBalance } = require('../web3/bulwark-core.js')
 
 // routes
 router.post('/login', (req, res) => {
@@ -22,9 +23,10 @@ router.post('/login', (req, res) => {
 						if(!matched) res.status(500).json({err: 'Wrong password.'}) && console.log(`[login - wrong password] ${email}`)
 						else try {
 								const payload = { user: _user._id }
-								if(_user.configured) payload.address = _user.keys.public
+								if(_user.configured && _user.insurance.insured) payload.address = _user.keys.public
 								const token = await getJwtToken({ user: _user._id })
 								const user = getResponsePayload(_user, token)
+								user.wallet.credits = parseFloat(await getAccountBalance(_user.keys.public))
 								res.json({user}) && console.log(`[login - success] ${email}`)
 							} catch(err) {
 								return res.status(500).json(`[login] - err ${email}`) && console.log(err)
