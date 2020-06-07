@@ -3,9 +3,10 @@ const jwt = require('jsonwebtoken')
 
 const SECRET_KEY = require('../config/keys').SECRET_KEY
 
+// expires in 50 weeks
 const getJwtToken = payload =>
     new Promise(function(resolve, reject) {
-        jwt.sign(payload, SECRET_KEY, (err, token) => {
+        jwt.sign(payload, SECRET_KEY, {expiresIn: 30240000000}, (err, token) => {
             if(err) reject(err)
             else resolve(token)
         })
