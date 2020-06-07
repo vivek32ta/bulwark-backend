@@ -1,10 +1,12 @@
 
-const express = require('express')
-const router = express.Router()
 const bcrypt = require('bcryptjs')
+const express = require('express')
+const passport = require('passport')
+const router = express.Router()
 
 const User = require('../models/User')
-const {getJwtToken, getResponsePayload} = require('./routing-helpers.js')
+const {	getJwtToken
+	  , getResponsePayload } = require('./routing-helpers.js')
 
 // routes
 router.post('/login', (req, res) => {
@@ -18,17 +20,15 @@ router.post('/login', (req, res) => {
 			else bcrypt.compare(password, _user.password)
 					.then(async matched => {
 						if(!matched) res.status(500).json({err: 'Wrong password.'}) && console.log(`[login - wrong password] ${email}`)
-						else {
-							let token
-							try {
-								token = await getJwtToken({ user: _user._id })
+						else try {
+								const payload = { user: _user._id }
+								if(_user.configured) payload.address = _user.keys.public
+								const token = await getJwtToken({ user: _user._id })
+								const user = getResponsePayload(_user, token)
+								res.json({user}) && console.log(`[login - success] ${email}`)
 							} catch(err) {
 								return res.status(500).json(`[login] - err ${email}`) && console.log(err)
 							}
-
-							const user = getResponsePayload(_user, token)
-							res.json({user}) && console.log(`[login - success] ${email}`)
-						}
 					})
 					.catch(err => {
 						res.status(500).json({err: '[err] check bulwark console.'})
@@ -73,6 +73,45 @@ router.post('/new', (req, res) => {
 		.catch(err => {
 			res.status(500).json({err: '[err] check bulwark console.'})
 			console.log(`[register - err] ${email}`)
+			console.log(err)
+		})
+})
+
+router.post('/details', passport.authenticate('jwt', {session: false}), (req, res) => {
+
+    const {userData} = req.body
+    const {insurance, dl} = userData
+	const userID = req.user.user
+    console.log(`[save_details] ${userID}`)
+
+	User.findById(userID)
+		.then(user => {
+			if(!user) res.status(500).json({err: 'User not found.'}) && console.log(`[save_details - not found] ${userID}`)
+			else {
+
+				insurance.insured = false
+				user.configured = true
+				user.dl = dl
+				user.insurance = insurance
+				
+				return user.save()
+			}
+		})
+		.then(async _user => {
+			if(!_user) return
+
+			try {
+				let token = await getJwtToken({ user: _user._id, address: _user.keys.public })
+				const user = getResponsePayload(_user, token)
+				res.json({msg: 'Successfully configured.', user})
+				console.log(`[save_details - success] ${userID}`)
+			} catch(err) {
+				return res.status(500).json({err: 'check bulwark console'})
+			}
+		})
+		.catch(err => {
+			res.status(500).json({err: 'check bulwark console.'})
+			console.log(`[save_details - err] ${userID}`)
 			console.log(err)
 		})
 })

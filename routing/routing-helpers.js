@@ -11,6 +11,8 @@ const getJwtToken = payload =>
         })
     })
 
+const getPremiumPrice = (vehicles, insurancePeriod) => vehicles.reduce((total, wheels) => (total + parseInt(insurancePeriod*0.25) + parseInt(wheels)), 0)
+
 const getResponsePayload = (user, token) => {
     const temp = {...user._doc}
     delete temp._id
@@ -19,10 +21,14 @@ const getResponsePayload = (user, token) => {
     temp.id = user._id
     temp.token = 'Bearer ' + token
 
+    if(temp.configured && !temp.insured)
+        temp.payPremium = getPremiumPrice([temp.insurance.vehicle.wheels], temp.insurance.period)
+
     return temp
-} 
+}
 
 module.exports = {
     getJwtToken,
+    getPremiumPrice,
     getResponsePayload
 }

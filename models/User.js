@@ -26,12 +26,16 @@ const UserSchema = {
             name: {
                 type: String
             },
-            type: {
-                type: String
+            wheels: {
+                type: Number
             },
             number: {
                 type: String
             }
+        },
+        insured: {
+            type: Boolean,
+            default: false
         },
         renewed: {
             type: Date

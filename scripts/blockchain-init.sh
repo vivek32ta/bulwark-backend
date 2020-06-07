@@ -8,7 +8,7 @@ if [[ $OSTYPE =~ linux-gnu* ]]; then
     sed -i'' "s/from: '0x.\{40\}'/from: '$AccountAddr'/g" initialize-chain.js
 
     ContractAddr=$(node initialize-chain.js | tail -1)
-    sed -i'' "s/contract.options.address = \"0x.\{40\}\"/contract.options.address = \"$ContractAddr\"/g" routing/bulwark.js
+    sed -i'' "s/contract.options.address = \"0x.\{40\}\"/contract.options.address = \"$ContractAddr\"/g" web3/bulwark-core.js
 
     awk "/\(0\)/,/\(9\)/" ./bulwark-data/ganache-output > ./bulwark-data/address-and-keys
 elif [[ $OSTYPE =~ darwin* ]]; then
@@ -19,7 +19,7 @@ elif [[ $OSTYPE =~ darwin* ]]; then
     sed -i '' "s/from: '0x.\{40\}'/from: '$AccountAddr'/g" initialize-chain.js
 
     ContractAddr=$(node initialize-chain.js | tail -1)
-    sed -i '' "s/contract.options.address = \"0x.\{40\}\"/contract.options.address = \"$ContractAddr\"/g" routing/bulwark.js
+    sed -i '' "s/contract.options.address = \"0x.\{40\}\"/contract.options.address = \"$ContractAddr\"/g" web3/bulwark-core.js
 
     awk "/\(0\)/,/\(9\)/" ./bulwark-data/ganache-output > ./bulwark-data/address-and-keys
 fi

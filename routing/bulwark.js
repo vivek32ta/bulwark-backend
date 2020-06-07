@@ -3,19 +3,8 @@ const express = require('express')
 const fs = require("fs")
 const passport = require('passport')
 const path = require('path')
-const Web3 = require('web3')
 
 const routing = express.Router()
-const abiFile = path.resolve(__dirname, '..' , 'contracts/Insurance_sol_Insurance.abi')
-
-//Web3 Configuration
-const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
-const abi = JSON.parse(fs.readFileSync(abiFile).toString())
-const contract = new web3.eth.Contract(abi)
-
-//Update the contract address here.
-contract.options.address = "0x1efb58C06149090795dA60088E1E0cF29Ff0517C"
-
 
 // Get Account Balance
 routing.get('/getAccountBalance', passport.authenticate('jwt', {session: false}), (req, res) => {
@@ -52,7 +41,8 @@ routing.get('/getAccountBalance', passport.authenticate('jwt', {session: false})
         })
 })
 
-//Route Example (GET): http://localhost:5000/isInsured/<Account Address>
+
+// Check if user is Insured
 routing.get('/isInsured', passport.authenticate('jwt', {session: false}), (req, res) => {
 
     const userID = req.user.user
@@ -86,13 +76,11 @@ routing.get('/isInsured', passport.authenticate('jwt', {session: false}), (req, 
 
 })
 
-/*
-Route Example (POST): http://localhost:5000/signUp/<Account Address>
-JSON Body: {"customerName":<Customer Name>, "vehicleNo":<Vehicle Number>}
-*/
+// Sign up user on blockchain
 routing.post('/signUp', passport.authenticate('jwt', {session: false}), (req, res) => {
 
-    const vehicleNo = req.body.vehicleNo
+    const {data} = req.body
+    const {insurancePeriod, vehicleNo} = data
     const userID = req.user.user
     const accountAddress = req.user.address
     console.log(`[bulwark_register] ${userID} -- ${accountAddress}`)
@@ -127,7 +115,7 @@ routing.post('/signUp', passport.authenticate('jwt', {session: false}), (req, re
         })
 })
 
-//Route Example (GET): http://localhost:5000/payPremium/<Account Address>
+// Pay premium
 routing.get('/payPremium', passport.authenticate('jwt', {session: false}), (req, res) => {
 
     const userID = req.user.user
@@ -164,7 +152,7 @@ routing.get('/payPremium', passport.authenticate('jwt', {session: false}), (req,
         })
 })
 
-//Route Example (GET): http://localhost:5000/claim/<Account Address>
+// Issue a claim
 routing.get('/claim', passport.authenticate('jwt', {session: false}), (req, res) => {
 
     const userID = req.user.user
@@ -196,22 +184,5 @@ routing.get('/claim', passport.authenticate('jwt', {session: false}), (req, res)
             console.log(err)
         })
 })
-
-
-
-/*
-routing.get('/getPremium/:accountAddress', (req,res)=>{
-    console.log("Routing to getPremium");
-    var senderAddress = req.params.accountAddress;
-
-    console.log("Getting Premium")
-    contract.methods.getPremium(senderAddress)
-    .call()
-    .then((f)=>{console.log(f); res.json({premium:f})})
-    .catch(console.log)
-})
-*/
-
-
 
 module.exports = routing

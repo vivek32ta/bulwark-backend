@@ -34,6 +34,10 @@ app.use('/bulwark', bulwarkRoutes)
 app.use('/insurance', insuranceRoutes)
 app.use('/user', userRoutes)
 
+// For development and testing
+const devRoutes = require('./routing/routes:dev.js')
+app.use('/dev', devRoutes)
+
 // interface
 app.get('/', (req, res) => {
 	app.use(express.static('build/interface'))
