@@ -7,7 +7,6 @@ const router = express.Router()
 const User = require('../models/User')
 const {	getJwtToken
 	  , getResponsePayload } = require('./routing-helpers.js')
-const {	getAccountBalance } = require('../web3/bulwark-core.js')
 
 // routes
 router.post('/login', (req, res) => {
@@ -25,8 +24,7 @@ router.post('/login', (req, res) => {
 								const payload = { user: _user._id }
 								if(_user.configured && _user.insurance.insured) payload.address = _user.keys.public
 								const token = await getJwtToken({ user: _user._id })
-								const user = getResponsePayload(_user, token)
-								user.wallet.credits = parseFloat(await getAccountBalance(_user.keys.public))
+								const user = await getResponsePayload(_user, token)
 								res.json({user}) && console.log(`[login - success] ${email}`)
 							} catch(err) {
 								return res.status(500).json(`[login] - err ${email}`) && console.log(err)
@@ -104,7 +102,7 @@ router.post('/details', passport.authenticate('jwt', {session: false}), (req, re
 
 			try {
 				let token = await getJwtToken({ user: _user._id, address: _user.keys.public })
-				const user = getResponsePayload(_user, token)
+				const user = await getResponsePayload(_user, token)
 				res.json({msg: 'Successfully configured.', user})
 				console.log(`[save_details - success] ${userID}`)
 			} catch(err) {

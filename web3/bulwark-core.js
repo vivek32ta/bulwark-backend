@@ -11,13 +11,21 @@ const abi = JSON.parse(fs.readFileSync(abiFile).toString())
 const contract = new web3.eth.Contract(abi)
 
 //Update the contract address here.
-contract.options.address = "0x59a18d548B986A13c2c1FFdF48e0504b64769b2a"
+contract.options.address = "0x3786A8Ba75DE530711D198f60800F16B0E8Ad64E"
 
 const accountCheck = address =>
     new Promise(function(resolve, reject) {
         console.log(`[BULWARK acc_check] ${address}`)
         web3.eth.getAccounts()
-            .then(allAccounts => allAccounts.includes(address) ? resolve(true) : resolve(false))
+            .then(allAccounts => {
+                if(allAccounts.includes(address)) {
+                    console.log(`[BULWARK acc_check] exists ${address}`)
+                    resolve(true)
+                } else {
+                    console.log(`[BULWARK acc_check] invalid ${address}`)
+                    resolve(false)
+                }
+            })
             .catch(err => reject(err))
     })
 
@@ -53,15 +61,22 @@ const isInsured = address =>
 const signUp = user =>
     new Promise(async function(resolve, reject) {
         const {address, userID, vehicleNo} = user
+        const amount = 1
         console.log(`[BULWARK sign_up] ${address}`)
         try {
             if(await accountCheck(address))
                 contract.methods.signUp(userID, vehicleNo)
                     .send({ from: address
-                        ,   value: web3.utils.toWei('1', 'ether')
+                        ,   value: web3.utils.toWei(`${amount}`, 'ether')
                         ,   gas: 210000 })
-                    .then(receipt => resolve(receipt))
-                    .catch(err => reject(err))
+                    .then(receipt => {
+                        console.log(`[BULWARK sign_up] success ${address}`)
+                        resolve(receipt)
+                    })
+                    .catch(err => {
+                        console.log(`[BULWARK sign_up] failed ${address}`)
+                        reject(err)
+                    })
             else reject({err: `${address} is invalid.`})
         } catch(err) {
             reject(err)

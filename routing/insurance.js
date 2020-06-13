@@ -6,7 +6,7 @@ const passport = require('passport')
 const path = require('path')
 
 const ADDR_PATH = path.resolve(__dirname, '../bulwark-data/address-and-keys')
-const {getJwtToken, getResponsePayload} = require('./routing-helpers.js')
+const {getJwtToken, getPremiumPrice, getResponsePayload} = require('./routing-helpers.js')
 
 const {accountCheck, signUp} = require('../web3/bulwark-core.js')
 
@@ -16,7 +16,8 @@ router.post('/new', passport.authenticate('jwt', {session: false}), (req, res) =
     console.log(`[new_insurance] ${userID}`)
 
 	User.findById(userID)
-		.then(user => {
+		.then(async user => {
+            const amount = getPremiumPrice([user.insurance.vehicle.wheels], user.insurance.period)
 			if(!user) res.status(500).json({err: 'User not found.'}) && console.log(`[new_insurance - not found] ${userID}`)
 			else fs.promises.readFile(ADDR_PATH, 'utf8')
 					.then(async data => {
@@ -25,7 +26,6 @@ router.post('/new', passport.authenticate('jwt', {session: false}), (req, res) =
                             res.status(500).json({err: 'Accounts full.'})
                             console.log(`[new_insurance] ${userID} - err : address and keys empty`)
                         } else {
-                            console.log(data)
                             const private = data.match(/0x.{64}/)[0]
                             const public = data.match(/0x.{40}/)[0]
                             const keys = {
@@ -38,9 +38,10 @@ router.post('/new', passport.authenticate('jwt', {session: false}), (req, res) =
                             fs.promises.writeFile(ADDR_PATH, updatedData)
 
                             const _data = {
+                                amount,
+                                address: user.keys.public,
                                 userID: user._id.toString(),
-                                vehicleNo: user.insurance.vehicle.number,
-                                address: user.keys.public
+                                vehicleNo: user.insurance.vehicle.number
                             }
 
                             let _res
@@ -48,6 +49,7 @@ router.post('/new', passport.authenticate('jwt', {session: false}), (req, res) =
                                 _res = await signUp(_data)
                                 console.log(_res)
                                 user.insurance.insured = true
+                                console.log(user)
                                 return user.save()
                             } catch(err) {
                                 console.log(`[new_insurance] ${userID} - err`)
@@ -60,17 +62,18 @@ router.post('/new', passport.authenticate('jwt', {session: false}), (req, res) =
 
                         if(!_user) return
 
-                        let token
+                        console.log(_user)
+
                         try {
-                            token = await getJwtToken({ user: _user._id, address: _user.keys.public })
+                            const token = await getJwtToken({ user: _user._id, address: _user.keys.public })
+                            const user = await getResponsePayload(_user, token)
+                            res.json({msg: 'Successfully configured.', user})
+                            console.log(`[new_insurance - success] ${userID}`)
                         } catch(err) {
                             console.log(`[new_insurance] ${userID} - err`)
                             console.log(err)
                             res.status(500).json({err: 'check bulwark console'})
                         }
-                        const user = getResponsePayload(_user, token)
-                        res.json({msg: 'Successfully configured.', user})
-                        console.log(`[new_insurance - success] ${userID}`)
                     })
 					.catch(err => {
                         res.status(500).json({err: 'check bulwark console.'})
