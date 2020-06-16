@@ -70,6 +70,7 @@ routing.get('/isInsured/:accountAddress', (req,res)=>{
     })
 })
 
+//ALERT: New Route!
 //Route Example (GET): http://localhost:5000/getPremium/<Account Address>
 routing.get('/getPremium/:accountAddress', (req,res)=>{
     console.log("Routing to getPremium");
