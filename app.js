@@ -35,7 +35,7 @@ app.use('/insurance', insuranceRoutes)
 app.use('/user', userRoutes)
 
 // For development and testing
-const devRoutes = require('./routing/routes:dev.js')
+const devRoutes = require('./routing/routes_dev.js')
 app.use('/dev', devRoutes)
 
 // interface

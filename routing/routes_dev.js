@@ -17,7 +17,7 @@ abi = JSON.parse(fs.readFileSync(abiFile).toString())
 contract = new web3.eth.Contract(abi)
 
 //Update the contract address here.
-contract.options.address = "0x6E3372cB3fe9E95F9A9DEaD75B1fd4A698393Dc6"
+contract.options.address = "0x29fbeF6F5b3DaA194e7c752c4A3Fae0CB0A6Cd71"
 
 
 // Routing Code
@@ -27,7 +27,6 @@ routing.get('/getAccountBalance/:accountAddress', (req,res)=>{
 
     console.log("Routing to getAccountBalance")
     var accountAddress = req.params.accountAddress;
-
     web3.eth.getAccounts().then((allAccounts)=>{
         console.log("Checking Balance");
 
@@ -71,23 +70,39 @@ routing.get('/isInsured/:accountAddress', (req,res)=>{
     })
 })
 
+//Route Example (GET): http://localhost:5000/getPremium/<Account Address>
+routing.get('/getPremium/:accountAddress', (req,res)=>{
+    console.log("Routing to getPremium");
+    var senderAddress = req.params.accountAddress;
+
+    console.log("Getting Premium")
+    contract.methods.getPremium(senderAddress)
+    .call()
+    .then((f)=>{
+            console.log(web3.utils.fromWei(f,'ether')); 
+            res.json({premium:web3.utils.fromWei(f,'ether')})
+        })
+    .catch(console.log)
+})
+
 /*
 Route Example (POST): http://localhost:5000/signUp/<Account Address>
-JSON Body: {"customerName":<Customer Name>, "vehicleNo":<Vehicle Number>}
+JSON Body: {"customerName":<Customer Name>, "vehicleNo":<Vehicle Number>, "premiumAmount":<Premium Amount>}
 */
 routing.post('/signUp/:accountAddress', (req,res)=>{
     console.log("Routing to underwriting");
     var senderAddress = req.params.accountAddress;
-    var {customerName, vehicleNo} = req.body;
+
+    var {customerName, vehicleNo, premiumAmount} = req.body;
     
     console.log("Underwrititng a new policy")
-
+    //var amount = parseInt(premiumAmount);
     web3.eth.getAccounts().then((allAccounts)=>{
         if(senderAddress!== null &&  allAccounts.includes(senderAddress))
         {
-            contract.methods.signUp(customerName,vehicleNo)
+            contract.methods.signUp(customerName, vehicleNo, web3.utils.toWei(premiumAmount,'ether'))
             .send({from: senderAddress,
-                    value: web3.utils.toWei('1','ether'),
+                    value: web3.utils.toWei(premiumAmount,'ether'),
                     gas:210000
                 })
             .then((receipt)=>{ console.log(receipt); res.json(receipt);})
@@ -102,10 +117,11 @@ routing.post('/signUp/:accountAddress', (req,res)=>{
 
 })
 
-//Route Example (GET): http://localhost:5000/payPremium/<Account Address>
-routing.get('/payPremium/:accountAddress/', (req,res)=>{
+//Route Example (POST): http://localhost:5000/payPremium/<Account Address>
+routing.post('/payPremium/:accountAddress/', (req,res)=>{
     console.log("Routing to payPremium");
     var senderAddress = req.params.accountAddress;
+    var {premiumAmount} = req.body;
     
     console.log("Paying Premium")
 
@@ -115,7 +131,7 @@ routing.get('/payPremium/:accountAddress/', (req,res)=>{
             contract.methods.payPremium(senderAddress)
             .send({
                 from: senderAddress, 
-                value: web3.utils.toWei('1','ether')})
+                value: web3.utils.toWei(premiumAmount,'ether')})
             .then((receipt)=>{console.log(receipt); res.json(receipt);})
             .catch(console.log)
         }
@@ -150,19 +166,6 @@ routing.get('/claim/:accountAddress', (req,res)=>{
 })
 
 
-
-/*
-routing.get('/getPremium/:accountAddress', (req,res)=>{
-    console.log("Routing to getPremium");
-    var senderAddress = req.params.accountAddress;
-
-    console.log("Getting Premium")
-    contract.methods.getPremium(senderAddress)
-    .call()
-    .then((f)=>{console.log(f); res.json({premium:f})})
-    .catch(console.log)
-})
-*/
 
 
 

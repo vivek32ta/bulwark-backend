@@ -11,6 +11,8 @@ contract Insurance {
         bool policyValid;
         uint256 lastPayment;
         uint256 premiumNo;
+        uint256 premiumAmount;
+        bool claimed;
     }
 
     constructor() public {
@@ -24,11 +26,11 @@ contract Insurance {
     mapping(address => InsuranceTaker) public insuranceTakers;
 
     //can be annual, half-yearly, quaterly or monthly
-    uint256 public policyPeriod = 30 days;
+    uint256 public policyPeriod = 365 days;
 
     function pay() external payable {
-        if (msg.value == getPremium()) {
-            revert("pay the correct premium price");
+        if (msg.value == getPremium(msg.sender)) {
+            revert("[SC: pay] Error: Pay the correct premium price.");
         }
     }
 
@@ -39,7 +41,7 @@ contract Insurance {
     modifier onlyBy() {
         require(
             msg.sender == contractOwner,
-            "only contract owner can call this"
+            "[SC: onlyBy] Error: Only contract owner can call."
         );
         _;
     }
@@ -47,35 +49,37 @@ contract Insurance {
     function deposit() public payable onlyBy() {
         require(
             msg.value >= 2 ether,
-            "contract needs funds for damage payment"
+            "[SC: deposit] Eror: Contract needs funds for damage payment."
         );
     }
 
-    function signUp(string memory _name, string memory _vehicleNo)
+    function signUp(string memory _name, string memory _vehicleNo, uint256 _premiumAmount)
         public
         payable
         returns (uint256)
     {
         //to check if new insurance taker has enough ether in their account
-        require(msg.sender.balance > 10 ether, "Not enough ether!");
+        require(msg.sender.balance > 10 ether, "[SC: signUp] Error: Not enough ether!");
         //setting the structure variables
         InsuranceTaker storage customer = insuranceTakers[msg.sender];
         customer.name = _name;
         customer.vehicleNo = _vehicleNo;
+        customer.premiumAmount = _premiumAmount;
         customer.insuranceTakerAddress = msg.sender;
         customer.premiumNo = 1;
+        
         //first premium to be paid upfront
         //require(msg.value == 0.01 ether,"err1");
         //contractOwner.transfer(getPremium());
-        require(payPremium(msg.sender), "need to pay first premium upfront");
+        require(payPremium(msg.sender), "[SC: signUp] Error: Need to pay first premium upfront.");
         return (200);
     }
 
     //calculates and returns the premium to be paid by the insurance taker
-    function getPremium() internal pure returns (uint256) {
-        //insuranceTaker customer = insuranceTakers[insuranceTaker];
+    function getPremium(address insuranceTaker) public view returns (uint256) {
+        InsuranceTaker storage customer = insuranceTakers[insuranceTaker];
         //premiumAmount = 1 ether;
-        return 1 ether;
+        return customer.premiumAmount;
     }
 
     //to check if a insurance taker is currently insured
@@ -87,30 +91,33 @@ contract Insurance {
 
     function payPremium(address insuranceTaker) public payable returns (bool) {
         InsuranceTaker storage customer = insuranceTakers[insuranceTaker];
-        //require(premiumAmount == getPremium(),"err0");
         if (customer.premiumNo == 1) {
-            require(msg.value == getPremium(), "err1");
+            require(msg.value == getPremium(insuranceTaker), "[SC: payPremium] Error: Value is not equal to premium amount.");
             customer.policyValid = true;
             customer.lastPayment = now;
+            customer.claimed = false;
             customer.premiumNo++;
         } else {
-            require(isInsured(insuranceTaker), "err2");
-            require(msg.value == getPremium(), "err3");
+            require(isInsured(insuranceTaker), "[SC: payPremium] Error: Customer is not insured yet.");
+            require(msg.value == getPremium(insuranceTaker), "[SC: payPremium] Error: Value is not equal to premium amount.");
             customer.policyValid = true;
             customer.lastPayment = now;
         }
         return true;
     }
 
-    uint256 public damageAmount = 2 ether;
+    uint256 public damageAmount;
 
     //claim function
     function claim() public payable {
         require(
             contractAddress.balance >= 2e18,
-            "minimum 2 ether required to refund"
+            "[SC: claim] Error: Minimum 2 ether required in the contract to refund."
         );
-        require(isInsured(msg.sender),"sorry signup for the policy first!");
+        require(isInsured(msg.sender),"[SC: claim] Error: Sorry, signup for the policy first!");
+        InsuranceTaker storage customer = insuranceTakers[msg.sender];
+        customer.claimed = true;
+        damageAmount = (customer.premiumAmount);
         msg.sender.transfer(damageAmount);
     }
 }
