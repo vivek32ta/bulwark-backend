@@ -62,4 +62,4 @@ Open a REST Client and give it a spin.
 * [Kashif M](https://github.com/kashif-m)
 * [Sohini Sahukar](https://github.com/sohinisahukar)
 * [Vivek T A](https://github.com/vivek32ta)
-* M S Nikhil
+* [M S Nikhil](https://github.com/msnikhil03)
