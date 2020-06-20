@@ -80,7 +80,7 @@ routing.get('/isInsured', passport.authenticate('jwt', {session: false}), (req, 
 routing.post('/signUp', passport.authenticate('jwt', {session: false}), (req, res) => {
 
     const {data} = req.body
-    const {insurancePeriod, vehicleNo} = data
+    const {amount, insurancePeriod, vehicleNo} = data
     const userID = req.user.user
     const accountAddress = req.user.address
     console.log(`[bulwark_register] ${userID} -- ${accountAddress}`)
@@ -91,9 +91,9 @@ routing.post('/signUp', passport.authenticate('jwt', {session: false}), (req, re
     web3.eth.getAccounts()
         .then(allAccounts => {
             if(accountAddress && allAccounts.includes(accountAddress))
-                contract.methods.signUp(userID, vehicleNo)
+                contract.methods.signUp(userID, vehicleNo, web3.utils.toWei(amount,'ether'))
                     .send({from: accountAddress,
-                            value: web3.utils.toWei('1', 'ether'),
+                            value: web3.utils.toWei(amount, 'ether'),
                             gas: 210000
                         })
                     .then(receipt => {
