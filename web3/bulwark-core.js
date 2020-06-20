@@ -11,7 +11,7 @@ const abi = JSON.parse(fs.readFileSync(abiFile).toString())
 const contract = new web3.eth.Contract(abi)
 
 //Update the contract address here.
-contract.options.address = "0x3786A8Ba75DE530711D198f60800F16B0E8Ad64E"
+contract.options.address = "0xbeCb7a5FEa32586F75926376B8826F885E6ad8cc"
 
 const accountCheck = address =>
     new Promise(function(resolve, reject) {
@@ -60,12 +60,11 @@ const isInsured = address =>
 
 const signUp = user =>
     new Promise(async function(resolve, reject) {
-        const {address, userID, vehicleNo} = user
-        const amount = 1
+        const {address, userID, vehicleNo, amount} = user
         console.log(`[BULWARK sign_up] ${address}`)
         try {
             if(await accountCheck(address))
-                contract.methods.signUp(userID, vehicleNo)
+                contract.methods.signUp(userID, vehicleNo, web3.utils.toWei(`${amount}`,'ether'))
                     .send({ from: address
                         ,   value: web3.utils.toWei(`${amount}`, 'ether')
                         ,   gas: 210000 })
