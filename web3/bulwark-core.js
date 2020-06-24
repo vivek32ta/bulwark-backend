@@ -58,6 +58,21 @@ const isInsured = address =>
         }
     })
 
+const getPremium = address =>
+    new Promise(async function(resolve,reject){
+        console.log(`[BULWARK get_premium] ${address}`)
+        try{
+            if(await accountCheck(address))
+                contract.methods.getPremium(address)
+                    .call()
+                    .then(getPremium => resolve(getPremium))
+                    .catch(err => reject(err))
+            else reject({err: `${address} is invalid.`})
+        } catch(err) {
+            reject(err)
+        }
+    })
+
 const signUp = user =>
     new Promise(async function(resolve, reject) {
         const {address, userID, vehicleNo, amount} = user
@@ -82,13 +97,15 @@ const signUp = user =>
         }
     })
 
+
+
 const payPremium = address =>
     new Promise(async function(resolve, reject) {
         console.log(`[BULWARK pay_premium] ${address}`)
         try {
             if(await accountCheck(address))
-                contract.methods.payPremium(accountAddress)
-                    .send({ from: accountAddress
+                contract.methods.payPremium(address)
+                    .send({ from: address
                         ,   value: web3.utils.toWei('1','ether') })
                     .then(receipt => resolve(receipt))
                     .catch(err => reject(err))
@@ -104,7 +121,7 @@ const issueClaim = address =>
         try {
             if(await accountCheck(address))
                 contract.methods.claim()
-                    .send({from: accountAddress})
+                    .send({from: address})
                     .then(receipt => resolve(receipt))
                     .catch(err => reject(err))
             else reject({err: `${address} is invalid.`})
@@ -119,5 +136,6 @@ module.exports = {
     isInsured,
     signUp,
     payPremium,
-    issueClaim
+    issueClaim,
+    getPremium
 }

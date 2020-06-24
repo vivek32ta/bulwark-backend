@@ -17,7 +17,7 @@ abi = JSON.parse(fs.readFileSync(abiFile).toString())
 contract = new web3.eth.Contract(abi)
 
 //Update the contract address here.
-contract.options.address = "0x29fbeF6F5b3DaA194e7c752c4A3Fae0CB0A6Cd71"
+contract.options.address = "0x8295AEd5249e6D6C4a65353ECe4c109dC5940E01"
 
 
 // Routing Code
@@ -88,20 +88,23 @@ routing.get('/getPremium/:accountAddress', (req,res)=>{
 
 /*
 Route Example (POST): http://localhost:5000/signUp/<Account Address>
-JSON Body: {"customerName":<Customer Name>, "vehicleNo":<Vehicle Number>, "premiumAmount":<Premium Amount>}
+JSON Body: {"aadhar":<Aadhar Number>, 
+            "surveyNo":<Survey Number>, 
+            "premiumAmount":<Premium Amount>,
+            "policyPeriod":<Policy Duration>}
 */
 routing.post('/signUp/:accountAddress', (req,res)=>{
     console.log("Routing to underwriting");
     var senderAddress = req.params.accountAddress;
 
-    var {customerName, vehicleNo, premiumAmount} = req.body;
+    var {aadhar, surveyNo, premiumAmount, policyPeriod} = req.body;
     
     console.log("Underwrititng a new policy")
     //var amount = parseInt(premiumAmount);
     web3.eth.getAccounts().then((allAccounts)=>{
         if(senderAddress!== null &&  allAccounts.includes(senderAddress))
         {
-            contract.methods.signUp(customerName, vehicleNo, web3.utils.toWei(premiumAmount,'ether'))
+            contract.methods.signUp(aadhar, surveyNo, web3.utils.toWei(premiumAmount,'ether'),policyPeriod)
             .send({from: senderAddress,
                     value: web3.utils.toWei(premiumAmount,'ether'),
                     gas:210000
@@ -144,17 +147,43 @@ routing.post('/payPremium/:accountAddress/', (req,res)=>{
     })
 })
 
-//Route Example (GET): http://localhost:5000/claim/<Account Address>
-routing.get('/claim/:accountAddress', (req,res)=>{
+//Route Example (GET): http://localhost:5000/claim/<SPI Value>/<Account Address>
+routing.get('/claim/:spi/:accountAddress', (req,res)=>{
     console.log("Routing to claim");
     var senderAddress = req.params.accountAddress;
+    var spi = req.params.spi;
     
     console.log("Claiming Insurance");
     web3.eth.getAccounts().then((allAccounts)=>{
         if(senderAddress!== null &&  allAccounts.includes(senderAddress))
         {
-            contract.methods.claim()
+            contract.methods.claim(spi)
             .send({from: senderAddress})
+            .then((receipt)=>{console.log(receipt); res.json(receipt);})
+            .catch(console.log)
+        }
+        else{
+            console.log("Invalid Account Address")
+            res.status(403);
+            res.json({'error':'Invalid Account Address'});
+        }
+    })
+})
+
+//Route Example (GET): http://localhost:5000/deposit/<Deposit in Ether>/<Account Address>
+routing.get('/deposit/:depositAmount/:accountAddress', (req,res)=>{
+    console.log("Routing to deposit");
+    var senderAddress = req.params.accountAddress;
+    var depositAmount = req.params.depositAmount;
+    
+    console.log("Depositing to contract");
+    web3.eth.getAccounts().then((allAccounts)=>{
+        if(senderAddress!== null &&  allAccounts.includes(senderAddress))
+        {
+            contract.methods.deposit()
+            .send({from: senderAddress,
+                    value: web3.utils.toWei(depositAmount,'ether')
+            })
             .then((receipt)=>{console.log(receipt); res.json(receipt);})
             .catch(console.log)
         }
