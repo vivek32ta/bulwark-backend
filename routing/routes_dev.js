@@ -17,12 +17,12 @@ abi = JSON.parse(fs.readFileSync(abiFile).toString())
 contract = new web3.eth.Contract(abi)
 
 //Update the contract address here.
-contract.options.address = "0x8295AEd5249e6D6C4a65353ECe4c109dC5940E01"
+contract.options.address = "0x85AedE8F9fB640859B8b2D005d5EdE85A7Da2A9a"
 
 
 // Routing Code
 
-//Route Example (GET): http://localhost:5000/getAccountBalance/<Account Address>
+//Route Example (GET): http://localhost:5000/dev/getAccountBalance/<Account Address>
 routing.get('/getAccountBalance/:accountAddress', (req,res)=>{
 
     console.log("Routing to getAccountBalance")
@@ -48,7 +48,7 @@ routing.get('/getAccountBalance/:accountAddress', (req,res)=>{
     })
 })
 
-//Route Example (GET): http://localhost:5000/isInsured/<Account Address>
+//Route Example (GET): http://localhost:5000/dev/isInsured/<Account Address>
 routing.get('/isInsured/:accountAddress', (req,res)=>{
     console.log("Routing to isInsured");
     var senderAddress = req.params.accountAddress;
@@ -70,8 +70,7 @@ routing.get('/isInsured/:accountAddress', (req,res)=>{
     })
 })
 
-//ALERT: New Route!
-//Route Example (GET): http://localhost:5000/getPremium/<Account Address>
+//Route Example (GET): http://localhost:5000/dev/getPremium/<Account Address>
 routing.get('/getPremium/:accountAddress', (req,res)=>{
     console.log("Routing to getPremium");
     var senderAddress = req.params.accountAddress;
@@ -86,25 +85,48 @@ routing.get('/getPremium/:accountAddress', (req,res)=>{
     .catch(console.log)
 })
 
+//Route Example (GET): http://localhost:5000/dev/getLocation/<Account Address>
+routing.get('/getLocation/:accountAddress', (req,res)=>{
+    console.log("Routing to getLocation");
+    var senderAddress = req.params.accountAddress;
+
+    web3.eth.getAccounts().then((allAccounts)=>{
+        if(senderAddress!== null &&  allAccounts.includes(senderAddress))
+        {
+            console.log("Retrieving Location")
+            contract.methods.getLocation(senderAddress)
+            .call()
+            .then((f)=>{console.log(f); res.json({"lat/lon":f});})
+            .catch(console.log)
+        }
+        else{
+            console.log("Invalid Account Address")
+            res.status(403);
+            res.json({'error':'Invalid Account Address'});
+        }
+    })
+})
+
 /*
-Route Example (POST): http://localhost:5000/signUp/<Account Address>
+Route Example (POST): http://localhost:5000/dev/signUp/<Account Address>
 JSON Body: {"aadhar":<Aadhar Number>, 
-            "surveyNo":<Survey Number>, 
-            "premiumAmount":<Premium Amount>,
-            "policyPeriod":<Policy Duration>}
+            "surveyNo":<Survey Number>,
+            "location":<Latitude/Longitude>,
+            "policyPeriod":<Policy Duration>, 
+            "premiumAmount":<Premium Amount>}
 */
 routing.post('/signUp/:accountAddress', (req,res)=>{
     console.log("Routing to underwriting");
     var senderAddress = req.params.accountAddress;
 
-    var {aadhar, surveyNo, premiumAmount, policyPeriod} = req.body;
+    var {aadhar, surveyNo, location, policyPeriod, premiumAmount} = req.body;
     
     console.log("Underwrititng a new policy")
     //var amount = parseInt(premiumAmount);
     web3.eth.getAccounts().then((allAccounts)=>{
         if(senderAddress!== null &&  allAccounts.includes(senderAddress))
         {
-            contract.methods.signUp(aadhar, surveyNo, web3.utils.toWei(premiumAmount,'ether'),policyPeriod)
+            contract.methods.signUp(aadhar, surveyNo, location, policyPeriod, web3.utils.toWei(premiumAmount,'ether'))
             .send({from: senderAddress,
                     value: web3.utils.toWei(premiumAmount,'ether'),
                     gas:210000
@@ -121,7 +143,7 @@ routing.post('/signUp/:accountAddress', (req,res)=>{
 
 })
 
-//Route Example (POST): http://localhost:5000/payPremium/<Account Address>
+//Route Example (POST): http://localhost:5000/dev/payPremium/<Account Address>
 routing.post('/payPremium/:accountAddress/', (req,res)=>{
     console.log("Routing to payPremium");
     var senderAddress = req.params.accountAddress;
@@ -147,7 +169,7 @@ routing.post('/payPremium/:accountAddress/', (req,res)=>{
     })
 })
 
-//Route Example (GET): http://localhost:5000/claim/<SPI Value>/<Account Address>
+//Route Example (GET): http://localhost:5000/dev/claim/<SPI Value>/<Account Address>
 routing.get('/claim/:spi/:accountAddress', (req,res)=>{
     console.log("Routing to claim");
     var senderAddress = req.params.accountAddress;
@@ -170,7 +192,7 @@ routing.get('/claim/:spi/:accountAddress', (req,res)=>{
     })
 })
 
-//Route Example (GET): http://localhost:5000/deposit/<Deposit in Ether>/<Account Address>
+//Route Example (GET): http://localhost:5000/dev/deposit/<Deposit in Ether>/<Account Address>
 routing.get('/deposit/:depositAmount/:accountAddress', (req,res)=>{
     console.log("Routing to deposit");
     var senderAddress = req.params.accountAddress;
@@ -194,9 +216,6 @@ routing.get('/deposit/:depositAmount/:accountAddress', (req,res)=>{
         }
     })
 })
-
-
-
 
 
 module.exports= routing;

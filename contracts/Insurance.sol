@@ -7,6 +7,7 @@ contract Insurance {
     struct InsuranceTaker {
         string aadhar;
         string surveyNo;
+        string location;
         address insuranceTakerAddress;
         bool policyValid;
         uint256 lastPayment;
@@ -51,7 +52,7 @@ contract Insurance {
         );
     }
 
-    function signUp(string memory _aadhar, string memory _surveyNo, uint256 _premiumAmount, uint256 _policyPeriod)
+    function signUp(string memory _aadhar, string memory _surveyNo, string memory _location, uint256 _policyPeriod, uint256 _premiumAmount)
         public
         payable
         returns (uint256)
@@ -65,6 +66,7 @@ contract Insurance {
         customer.premiumAmount = _premiumAmount;
         customer.insuranceTakerAddress = msg.sender;
         customer.policyPeriod = _policyPeriod * 1 days;
+        customer.location = _location;
         customer.premiumNo = 1;
         
         //First premium to be paid upfront
@@ -83,6 +85,11 @@ contract Insurance {
         InsuranceTaker storage customer = insuranceTakers[insuranceTaker];
         return (customer.policyValid &&
             (customer.lastPayment + customer.policyPeriod >= now));
+    }
+    
+    function getLocation(address insuranceTaker) public view returns (string memory) {
+        InsuranceTaker storage customer = insuranceTakers[insuranceTaker];
+        return customer.location;
     }
 
     function payPremium(address insuranceTaker) public payable returns (bool) {
