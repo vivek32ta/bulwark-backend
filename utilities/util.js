@@ -29,14 +29,13 @@ const convertCurrency = async (value, currency, targetCurrency) => {
             res = value * marketPrice
         } else if(targetCurrency.toLowerCase() === 'eth') {
             const marketPrice = await getCurrentPrice(currency)
-            console.log(marketPrice)
             res = value / marketPrice
+            console.log(res * 0.03)
         } else console.log('[Currency Converter] only for converting from and to ETH.')
 
     } catch(err) {
         console.log(`[Currency Converter] err ${err}`)
     }
-
     return res
 }
 
@@ -63,8 +62,7 @@ const getResponsePayload = async (user, token) => {
     temp.token = 'Bearer ' + token
 
     if(temp.configured && !temp.insurance.insured)
-        temp.payPremium = await getPremiumPrice(temp.insurance.interval)
-
+        temp.payPremium = await getPremiumPrice(temp.insurance.coverage)
     try {
         if(temp.configured && temp.insurance.insured)
             temp.wallet.credits = parseFloat(await getAccountBalance(temp.keys.public))
