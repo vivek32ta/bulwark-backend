@@ -11,7 +11,7 @@ const abi = JSON.parse(fs.readFileSync(abiFile).toString())
 const contract = new web3.eth.Contract(abi)
 
 //Update the contract address here.
-contract.options.address = "0x936AB8ef22A26FC3519D5b83C8c86345f3D20949"
+contract.options.address = "0xc9Aa39efaC2Ef9C2Cec0a1A8688975EA6b64E4F0"
 
 const accountCheck = address =>
     new Promise(function(resolve, reject) {

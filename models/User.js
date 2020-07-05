@@ -42,6 +42,12 @@ const UserSchema = {
         },
         amount: {
             type: Number
+        },
+        date: {
+            type: Date
+        },
+        coverage: {
+            type: Number
         }
     },
     keys: {

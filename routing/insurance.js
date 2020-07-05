@@ -4,9 +4,9 @@ const router = express.Router()
 const fs = require('fs')
 const passport = require('passport')
 
-const {getJwtToken, getPremiumPrice, getResponsePayload} = require('./routing-helpers.js')
+const {getJwtToken, getPremiumPrice, getResponsePayload} = require('../utilities/util.js')
 
-const {accountCheck, signUp} = require('../web3/bulwark-core.js')
+const {signUp} = require('../web3/bulwark-core.js')
 
 router.get('/new', passport.authenticate('jwt', {session: false}), (req, res) => {
 
@@ -17,7 +17,7 @@ router.get('/new', passport.authenticate('jwt', {session: false}), (req, res) =>
 		.then(async user => {
             if(!user) res.status(500).json({err: 'User not found.'}) && console.log(`[new_insurance - not found] ${userID}`)
             else {
-                const premiumAmount = getPremiumPrice(user.insurance.interval)
+                const premiumAmount = getPremiumPrice(user.insurance.coverage)
                 let {location} = user.insurance
                 location = `lat=${location.lat}&lon=${location.lon}`
                 const _data = {
@@ -34,6 +34,7 @@ router.get('/new', passport.authenticate('jwt', {session: false}), (req, res) =>
                     let _res = await signUp(_data)
                     console.log(_res)
                     user.insurance.insured = true
+                    user.insurance.date = new Date()
                     return user.save()
                 } catch(err) {
                     console.log(`[new_insurance] ${userID} - err`)

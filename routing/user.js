@@ -7,8 +7,8 @@ const path = require('path')
 const router = express.Router()
 const ADDR_PATH = path.resolve(__dirname, '../bulwark-data/address-and-keys')
 const User = require('../models/User')
-const {	getJwtToken
-	  , getResponsePayload } = require('./routing-helpers.js')
+
+const {getJwtToken, getResponsePayload} = require('../utilities/util.js')
 
 // routes
 router.get('/', passport.authenticate('jwt', {session: false}), (req, res) => {
