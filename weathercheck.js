@@ -63,7 +63,7 @@ routing.post('/getSPI',(req,res)=>{
     .catch(err=>{res.json(err); console.log("Prcp Average:"+err.response.status+" "+err.response.statusText)});
 })
 
-module.exports=routing;
+
 
 
 /*
@@ -79,8 +79,17 @@ SPI CLASSIFICATION
 
 */
 
+routing.post('/tenDays',(req,res)=>{
+    var appid = "02754bca9d6b7e48e4dced47d096e5b7";
+    var {lat, lon} = req.body;
+
+    axios.get("https://api.openweathermap.org/data/2.5/onecall?lat="+lat+"&lon="+lon+"&exclude=minutely,hourly&appid="+appid)
+    .then(response=>{
+        res.json(response)
+    }).catch(console.log)
+})
 
 
 
-
+module.exports=routing;
 
