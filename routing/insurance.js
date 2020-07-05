@@ -17,7 +17,7 @@ router.get('/new', passport.authenticate('jwt', {session: false}), (req, res) =>
 		.then(async user => {
             if(!user) res.status(500).json({err: 'User not found.'}) && console.log(`[new_insurance - not found] ${userID}`)
             else {
-                const premiumAmount = getPremiumPrice(user.insurance.coverage)
+                const premiumAmount = await getPremiumPrice(user.insurance.coverage)
                 let {location} = user.insurance
                 location = `lat=${location.lat}&lon=${location.lon}`
                 const _data = {
