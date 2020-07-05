@@ -11,11 +11,7 @@ const abi = JSON.parse(fs.readFileSync(abiFile).toString())
 const contract = new web3.eth.Contract(abi)
 
 //Update the contract address here.
-<<<<<<< Updated upstream
 contract.options.address = "0xc9Aa39efaC2Ef9C2Cec0a1A8688975EA6b64E4F0"
-=======
-contract.options.address = "0xC09B8928374de2070f6B8F1Fd6E94A9Ea56D9d88"
->>>>>>> Stashed changes
 
 const accountCheck = address =>
     new Promise(function(resolve, reject) {
