@@ -166,8 +166,8 @@ routing.get('/payPremium', passport.authenticate('jwt', {session: false}), (req,
                         value: web3.utils.toWei('1','ether')
                     })
                     .then(receipt => {
-                        console.log(receipt)
                         res.json(receipt)
+                        console.log(receipt)
                     })
                     .catch(err => {
                         res.status(500).json({err: 'check bulwark console.'})

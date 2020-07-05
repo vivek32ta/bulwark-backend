@@ -14,35 +14,35 @@ const UserSchema = {
         type: String,
         required: true
     },
-    dl: {
-        type: String
-    },
     configured: {
         type: Boolean,
         default: false
     },
     insurance: {
-        vehicle: {
-            name: {
-                type: String
-            },
-            wheels: {
+        aadhar: {
+            type: String
+        },
+        surveyNo: {
+            type: String
+        },
+        location: {
+            lat: {
                 type: Number
             },
-            number: {
-                type: String
+            lon: {
+                type: Number
             }
         },
         insured: {
             type: Boolean,
             default: false
         },
-        renewed: {
-            type: Date
-        },
-        period: {
+        interval: {
             type: Number
         },
+        amount: {
+            type: Number
+        }
     },
     keys: {
         private: {
@@ -50,6 +50,10 @@ const UserSchema = {
         },
         public: {
             type: String,
+        },
+        dev: {
+            type: Boolean,
+            default: false
         }
     },
     wallet: {

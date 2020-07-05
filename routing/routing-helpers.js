@@ -13,7 +13,7 @@ const getJwtToken = payload =>
         })
     })
 
-const getPremiumPrice = (vehicles, insurancePeriod) => vehicles.reduce((total, wheels) => (total + parseInt(insurancePeriod*0.25) + parseInt(wheels)), 0)
+const getPremiumPrice = insuranceInterval => (insuranceInterval * 0.25 )
 
 const getResponsePayload = async (user, token) => {
     const temp = {...user._doc}
@@ -24,7 +24,7 @@ const getResponsePayload = async (user, token) => {
     temp.token = 'Bearer ' + token
 
     if(temp.configured && !temp.insurance.insured)
-        temp.payPremium = getPremiumPrice([temp.insurance.vehicle.wheels], temp.insurance.period)
+        temp.payPremium = getPremiumPrice(temp.insurance.interval)
 
     try {
         if(temp.configured && temp.insurance.insured)

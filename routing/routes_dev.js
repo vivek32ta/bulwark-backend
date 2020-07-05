@@ -120,7 +120,7 @@ routing.post('/signUp/:accountAddress', (req,res)=>{
     var senderAddress = req.params.accountAddress;
 
     var {aadhar, surveyNo, location, policyPeriod, premiumAmount} = req.body;
-    
+
     console.log("Underwrititng a new policy")
     //var amount = parseInt(premiumAmount);
     web3.eth.getAccounts().then((allAccounts)=>{
