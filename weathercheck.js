@@ -1,6 +1,6 @@
 var axios = require("axios");
-var lat=12.9791198
-var long=77.5912997
+const express = require('express')
+const routing = express.Router()
 
 
 function toUNIX(today) { return (Math.round(today.getTime()/1000)) }
@@ -8,27 +8,35 @@ function toUNIX(today) { return (Math.round(today.getTime()/1000)) }
 "https://api.openweathermap.org/data/2.5/onecall?"+lat+"&lon="+long+"&exclude=minutely,hourly"+"&appid="+appid
 */
 
+/*
+Route Example: (POST) https://localhost:5000/weather/getSPI/
+JSON Body: {
+            "lat" : "12.9791198"
+            "lon" : "77.5912997"
+            "start" : "2020-06-05" YYYY/MM/DD
+            "end" : "2020-07-05" }
+*/
+routing.post('/getSPI',(req,res)=>{
+    var {lat, lon, start, end} = req.body;
+    console.log("Calculating SPI");
 
-async function getSPI(la, lo, start, end)
-{
-    var month = parseInt(start.substring(5,7))
-
+    var month = parseInt(start.substring(5,7));
     var avgPrcp, normalPrcp;
-    var header = {"x-api-key" : "lMdC6EVgqoLQRhElLrvu9TZcEQRlqTgT"}
-    
-    await axios.get("https://api.meteostat.net/v2/point/daily?lat="+la+"&lon="+lo+"&start="+start+"&end="+end, header)
-    .then(res => {
-        var allData = res.data.data;
+    //var header = {"x-api-key" : "lMdC6EVgqoLQRhElLrvu9TZcEQRlqTgT"}
+    axios.get("https://api.meteostat.net/v2/point/daily?lat="+lat+"&lon="+lon+"&start="+start+"&end="+end, {
+        headers: {"x-api-key" : "lMdC6EVgqoLQRhElLrvu9TZcEQRlqTgT"}})
+    .then(respon => {
+        var allData = respon.data.data;
         var sumPrcp=0;
         allData.forEach(ele => { sumPrcp = sumPrcp + ele.prcp;  });
         avgPrcp = (sumPrcp / allData.length)
         console.log("Average Precipitation: "+avgPrcp)
 
 
-        axios.get("https://api.meteostat.net/v2/point/climate?lat="+la+"&lon="+lo , header)
-        .then(res => {
-            console.log("Normalised Precipitation: "+res.data.data[month-1].prcp)
-            normalPrcp = res.data.data[month-1].prcp;
+        axios.get("https://api.meteostat.net/v2/point/climate?lat="+lat+"&lon="+lon , {headers: {"x-api-key" : "lMdC6EVgqoLQRhElLrvu9TZcEQRlqTgT"}})
+        .then(response => {
+            console.log("Normalised Precipitation: "+response.data.data[month-1].prcp)
+            normalPrcp = response.data.data[month-1].prcp;
 
             var sumsqPrcp, sd;
             allData.forEach(ele => { sumsqPrcp = Math.pow((ele.prcp - avgPrcp),2)  });
@@ -36,14 +44,27 @@ async function getSPI(la, lo, start, end)
             console.log("SD: "+sd);
             spi = (avgPrcp-(normalPrcp/26))/sd
             console.log("Standardized Precipitation Index (SPI):"+spi);
-            return spi;
+            
+            var spiClass=-1;
+            if(spi>=2) {return 0}
+            else if((spi>=1.50) && (spi<2)) {spiClass = 1}
+            else if((spi>=1) && (spi<1.5)) {spiClass = 2}
+            else if((spi>=-1) && (spi<1)) {spiClass = 3}
+            else if((spi>=-1.5) && (spi<-1)) {spiClass = 4}
+            else if((spi>=-2) && (spi<-1.5)) {spiClass = 5}
+            else if(spi<=-2) {spiClass = 6}
+            console.log("SPI Class: "+spiClass);
+            res.json({spiClass:spiClass})
+        
+        
         })
-        .catch(err=>{console.log("Prcp Normal:"+err.response.status+" "+err.response.statusText)});
+        .catch(err=>{res.json(err); console.log("Prcp Normal:"+err.response.status+" "+err.response.statusText)});
     })
-    .catch(err=>{console.log("Prcp Average:"+err.response.status+" "+err.response.statusText)});
-}
+    .catch(err=>{res.json(err); console.log("Prcp Average:"+err.response.status+" "+err.response.statusText)});
+})
 
-getSPI(lat,long,"2020-05-20","2020-06-23")
+module.exports=routing;
+
 
 /*
 SPI CLASSIFICATION 
@@ -57,7 +78,6 @@ SPI CLASSIFICATION
 [6] Extreme drought [   <= -2.00  ] 100%
 
 */
-
 
 
 

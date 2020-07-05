@@ -29,10 +29,12 @@ mongoose
 const bulwarkRoutes = require("./routing/bulwark")
 const insuranceRoutes = require("./routing/insurance")
 const userRoutes = require("./routing/user")
+const weatherRoutes = require("./utilities/weathercheck")
 
 app.use('/bulwark', bulwarkRoutes)
 app.use('/insurance', insuranceRoutes)
 app.use('/user', userRoutes)
+app.use('/weather',weatherRoutes)
 
 // For development and testing
 const devRoutes = require('./routing/routes_dev.js')
