@@ -6,12 +6,13 @@ const Web3 = require('web3')
 const abiFile = path.resolve(__dirname, '..' , 'contracts/Insurance_sol_Insurance.abi')
 
 //Web3 Configuration
+
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
 const abi = JSON.parse(fs.readFileSync(abiFile).toString())
 const contract = new web3.eth.Contract(abi)
 
 //Update the contract address here.
-contract.options.address = "0xc9Aa39efaC2Ef9C2Cec0a1A8688975EA6b64E4F0"
+contract.options.address = "0xC09B8928374de2070f6B8F1Fd6E94A9Ea56D9d88"
 
 const accountCheck = address =>
     new Promise(function(resolve, reject) {

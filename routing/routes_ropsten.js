@@ -11,17 +11,30 @@ abiFile = path.resolve(__dirname, '..' , 'contracts/Insurance_sol_Insurance.abi'
 
 
 
-//Web3 Configuration
-//For Ropsten use: Supports only calls, not transactions.
+
+//Web3 Metamask Configuration
+
+const MetaMaskConnector = require('node-metamask');
+const connector = new MetaMaskConnector({
+   port = 3333,// this is the default port
+  onConnect() { console.log('MetaMask client connected') }, // Function to run when MetaMask is connected (optional)
+});
+ 
+connector.start().then(() => {
+  // Now go to http://localhost:3333 in your MetaMask enabled web browser.
+  const web3 = new Web3(connector.getProvider());
+  // Use web3 as you would normally do. Sign transactions in the browser.
+
+
 //web3 = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/v3/80971d4829e9484cb99c2add04abd977'));
-web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
+//web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
+
 abi = JSON.parse(fs.readFileSync(abiFile).toString())
 contract = new web3.eth.Contract(abi)
 
 //Update the contract address here.
-contract.options.address = "0xC09B8928374de2070f6B8F1Fd6E94A9Ea56D9d88" //Ganache
-
-//contract.options.address = "0x6f0Eca3fdc60F064Ae9f1552a9b305608A970C7f" //Ropsten (For Web3 in Ropsten Testnet)
+//contract.options.address = "0xC09B8928374de2070f6B8F1Fd6E94A9Ea56D9d88" //Ganache (test)
+contract.options.address = "0x6f0Eca3fdc60F064Ae9f1552a9b305608A970C7f" //Ropsten
 
 
 // Routing Code
@@ -45,9 +58,9 @@ routing.get('/getAccountBalance/:accountAddress', (req,res)=>{
             })
         }
         else{
-            console.log("Invalid Account Address")
-            res.status(403);
-            res.json({'error':'Invalid Account Address'});
+           console.log("Invalid Account Address")
+           res.status(403);
+           res.json({'error':'Invalid Account Address'});
         }
     })
 })
@@ -126,7 +139,7 @@ routing.post('/signUp/:accountAddress', (req,res)=>{
     var {aadhar, surveyNo, location, policyPeriod, premiumAmount} = req.body;
 
     console.log("Underwrititng a new policy")
-    //var amount = parseInt(premiumAmount);
+    var amount = parseInt(premiumAmount);
     web3.eth.getAccounts().then((allAccounts)=>{
         if(senderAddress!== null &&  allAccounts.includes(senderAddress))
         {
@@ -221,6 +234,10 @@ routing.get('/deposit/:depositAmount/:accountAddress', (req,res)=>{
         }
     })
 })
+
+
+});
+//connector.stop()
 
 
 module.exports= routing;
