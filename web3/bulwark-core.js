@@ -9,7 +9,7 @@ const abiFile = path.resolve(__dirname, '..' , 'contracts/Insurance_sol_Insuranc
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
 const abi  = JSON.parse(fs.readFileSync(abiFile).toString())
 const contract = new web3.eth.Contract(abi)
-contract.options.address = ""
+contract.options.address = "0x35922b782594411be289eeC5e4a453759b2c7b6C"
 
 const accountCheck = address =>
     new Promise(function(resolve, reject) {
@@ -51,7 +51,7 @@ const signUp = user =>
                 contract.methods.signUp(aadhar, surveyNo, location, interval, web3.utils.toWei(`${premiumAmount}`,'ether'))
                     .send({ from: address
                         ,   value: web3.utils.toWei(`${premiumAmount}`, 'ether')
-                        ,   gas: 210000 })
+                        ,   gas: 2100000 })
                     .then(receipt => {
                         console.log(`[BULWARK sign_up] success ${address}`)
                         resolve(receipt)

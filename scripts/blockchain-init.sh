@@ -11,6 +11,7 @@ if [[ $OSTYPE =~ linux-gnu* ]]; then
     sed -i'' "s/contract.options.address = \"0x.\{40\}\"/contract.options.address = \"$ContractAddr\"/g" web3/bulwark-core.js
 
     awk "/\(0\)/,/\(9\)/" ./bulwark-data/ganache-output > ./bulwark-data/address-and-keys
+    sed -i'' 's/(0)//g' bulwark-data/address-and-keys
 elif [[ $OSTYPE =~ darwin* ]]; then
 
     echo "Hello, Mac!"
@@ -22,4 +23,5 @@ elif [[ $OSTYPE =~ darwin* ]]; then
     sed -i '' "s/contract.options.address = \"0x.\{40\}\"/contract.options.address = \"$ContractAddr\"/g" web3/bulwark-core.js
 
     awk "/\(0\)/,/\(9\)/" ./bulwark-data/ganache-output > ./bulwark-data/address-and-keys
+    sed -i '' 's/(0)//g' bulwark-data/address-and-keys
 fi

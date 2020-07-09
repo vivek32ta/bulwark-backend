@@ -26,7 +26,7 @@ router.get('/new', passport.authenticate('jwt', {session: false}), (req, res) =>
                     premiumAmount,
                     location,
                     aadhar: user.insurance.aadhar,
-                    surveyNo: 'totallyforgotaboutthis',
+                    surveyNo: user.insurance.surveyNo,
                     interval: user.insurance.interval
                 }
 
@@ -44,6 +44,7 @@ router.get('/new', passport.authenticate('jwt', {session: false}), (req, res) =>
             }
         })
         .then(async _user => {
+            if(!_user) return
             try {
                 const token = await getJwtToken({ user: _user._id, address: _user.keys.public })
                 const user = await getResponsePayload(_user, token)
