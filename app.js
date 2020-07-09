@@ -40,8 +40,8 @@ app.use('/dev', devRoutes)
 
 // interface
 app.get('/', (req, res) => {
-	app.use(express.static('build/interface'))
-	res.sendFile(path.resolve(__dirname, 'build', 'interface','index.html'))
+	app.use(express.static('interface'))
+	res.sendFile(path.resolve(__dirname, 'interface','index.html'))
 })
   
 
