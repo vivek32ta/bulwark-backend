@@ -1,18 +1,15 @@
 
-const fs = require("fs")
+const fs   = require("fs")
 const path = require('path')
 const Web3 = require('web3')
 
+//Web3 Configuration
 const abiFile = path.resolve(__dirname, '..' , 'contracts/Insurance_sol_Insurance.abi')
 
-//Web3 Configuration
-
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
-const abi = JSON.parse(fs.readFileSync(abiFile).toString())
+const abi  = JSON.parse(fs.readFileSync(abiFile).toString())
 const contract = new web3.eth.Contract(abi)
-
-//Update the contract address here.
-contract.options.address = "0xC09B8928374de2070f6B8F1Fd6E94A9Ea56D9d88"
+contract.options.address = ""
 
 const accountCheck = address =>
     new Promise(function(resolve, reject) {
@@ -37,36 +34,6 @@ const getAccountBalance = address =>
             if(await accountCheck(address))
                 web3.eth.getBalance(address)
                     .then(bal => resolve(web3.utils.fromWei(bal)))
-                    .catch(err => reject(err))
-            else reject({err: `${address} is invalid.`})
-        } catch(err) {
-            reject(err)
-        }
-    })
-
-const isInsured = address =>
-    new Promise(async function(resolve, reject) {
-        console.log(`[BULWARK is_insured] ${address}`)
-        try {
-            if(await accountCheck(address))
-                contract.methods.isInsured(address)
-                    .call()
-                    .then(isInsured => resolve(isInsured))
-                    .catch(err => reject(err))
-            else reject({err: `${address} is invalid.`})
-        } catch(err) {
-            reject(err)
-        }
-    })
-
-const getPremium = address =>
-    new Promise(async function(resolve,reject){
-        console.log(`[BULWARK get_premium] ${address}`)
-        try{
-            if(await accountCheck(address))
-                contract.methods.getPremium(address)
-                    .call()
-                    .then(getPremium => resolve(getPremium))
                     .catch(err => reject(err))
             else reject({err: `${address} is invalid.`})
         } catch(err) {
@@ -99,45 +66,9 @@ const signUp = user =>
         }
     })
 
-
-
-const payPremium = address =>
-    new Promise(async function(resolve, reject) {
-        console.log(`[BULWARK pay_premium] ${address}`)
-        try {
-            if(await accountCheck(address))
-                contract.methods.payPremium(address)
-                    .send({ from: address
-                        ,   value: web3.utils.toWei('1','ether') })
-                    .then(receipt => resolve(receipt))
-                    .catch(err => reject(err))
-            else reject({err: `${address} is invalid.`})
-        } catch(err) {
-            reject(err)
-        }
-    })
-
-const issueClaim = address =>
-    new Promise(async function(resolve, reject) {
-        console.log(`[BULWARK claim] ${address}`)
-        try {
-            if(await accountCheck(address))
-                contract.methods.claim()
-                    .send({from: address})
-                    .then(receipt => resolve(receipt))
-                    .catch(err => reject(err))
-            else reject({err: `${address} is invalid.`})
-        } catch(err) {
-
-        }
-    })
-
 module.exports = {
     accountCheck,
     getAccountBalance,
-    isInsured,
     signUp,
-    payPremium,
-    issueClaim,
-    getPremium
+    web3
 }

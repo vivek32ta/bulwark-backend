@@ -1,4 +1,5 @@
-var axios = require("axios");
+const axios = require("axios")
+const {meteoStatAPI} = require('../config/keys.js')
 
 /*
 SPI CLASSIFICATION 
@@ -22,7 +23,7 @@ const calculateSPI = data => {
         var avgPrcp, normalPrcp;
         var spiClass;
         await axios.get("https://api.meteostat.net/v2/point/daily?lat="+lat+"&lon="+lon+"&start="+start+"&end="+end, {
-            headers: {"x-api-key" : "lMdC6EVgqoLQRhElLrvu9TZcEQRlqTgT"}})
+            headers: {"x-api-key" : meteoStatAPI}})
             .then(respon => {
                 var allData = respon.data.data;
                 var sumPrcp=0;
@@ -31,7 +32,7 @@ const calculateSPI = data => {
                 //console.log("Average Precipitation: "+avgPrcp)
 
 
-                axios.get("https://api.meteostat.net/v2/point/climate?lat="+lat+"&lon="+lon , {headers: {"x-api-key" : "lMdC6EVgqoLQRhElLrvu9TZcEQRlqTgT"}})
+                axios.get("https://api.meteostat.net/v2/point/climate?lat="+lat+"&lon="+lon , {headers: {"x-api-key" : meteoStatAPI}})
                 .then(response => {
                     //console.log("Normalised Precipitation: "+response.data.data[month-1].prcp)
                     normalPrcp = response.data.data[month-1].prcp;

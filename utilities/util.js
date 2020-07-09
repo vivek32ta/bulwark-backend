@@ -1,8 +1,8 @@
 const axios = require("axios")
 const jwt = require('jsonwebtoken')
 
-const {	getAccountBalance } = require('../web3/bulwark-core.js')
-const SECRET_KEY = require('../config/keys').SECRET_KEY
+const {	getAccountBalance }        = require('../web3/bulwark-core.js')
+const {SECRET_KEY, openWeatherMap} = require('../config/keys.js')
 
 const getCurrentPrice = targetCurrency => new Promise(async (resolve, reject) => {
     try {
@@ -74,10 +74,22 @@ const getResponsePayload = async (user, token) => {
     return temp
 }
 
+const getWeatherForecast = location => new Promise(async (resolve, reject) => {
+    
+    try {
+        const {lat, lon} = location
+        const response   = await axios.get(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly&appid=${openWeatherMap}`)
+        resolve(response.data)
+    } catch(err) {
+        reject(err)
+    }
+})
+
 module.exports = {
     convertCurrency,
     getPremiumPrice,
     getJwtToken,
     getPremiumPrice,
-    getResponsePayload
+    getResponsePayload,
+    getWeatherForecast
 }
