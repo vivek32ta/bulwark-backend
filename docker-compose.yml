@@ -1,0 +1,26 @@
+version: "3"
+services:
+  bulwark:
+    container_name: bulwark
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        CACHEBUST          : "${CACHEBUST}"
+        NODE_ENV           : "${NODE_ENV}"
+        MONGO_URI          : "${MONGO_URI}"
+        SECRET_KEY         : "${SECRET_KEY}"
+        METEO_STAT_API     : "${METEO_STAT_API}"
+        OPEN_WEATHERMAP_ID : "${OPEN_WEATHERMAP_ID}"
+    ports:
+      - "5000:5000"
+    links:
+      - mongo
+  mongo:
+    container_name: mongo
+    image: mongo
+    volumes:
+      - /bulwark/mongodb/data:/data/db
+    ports:
+      - "27018:27017"

@@ -1,6 +1,7 @@
-ganache-output
-address-and-keys
+bulwark-data
 build
 node_modules
 dev-keys.js
-docker/build
+docker-build
+node_modules
+.env
