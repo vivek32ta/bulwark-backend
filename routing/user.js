@@ -152,6 +152,27 @@ router.post('/details', passport.authenticate('jwt', {session: false}), (req, re
 		})
 })
 
+router.get('/claims', passport.authenticate('jwt', {session: false}), (req, res) => {
+	const userID = req.user.user
+	console.log(`[get-claims] ${userID}`)
+
+	Data.findOne({user: userID})
+		.then(data => {
+			if(!data) {
+				console.log(`[get-claims] not found`)
+				res.status(400).json({err: 'No data, bro.'})
+			}
+			else {
+				console.log(`[get-claims] done`)
+				res.json({claims: data.claims})
+			}
+		})
+		.catch(err => {
+			console.log(`[get-claims] err`)
+			console.log(err)
+		})
+})
+
 // Assign dev keys
 router.get('/dev:keys', passport.authenticate('jwt', {session: false}), (req, res) => {
 	const userID = req.user.user
