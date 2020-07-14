@@ -3,13 +3,28 @@ const express  = require('express')
 const mongoose = require('mongoose')
 const passport = require('passport')
 
-const {web3}         = require('../web3/bulwark-core.js')
+const {web3, isInsured, transactions}         = require('../web3/bulwark-core.js')
+const {getWeatherForecast} = require('../utilities/util.js')
 const {calculateSPI} = require('../utilities/spi-core.js')
 const Data           = require('../models/Data')
 const User           = require('../models/User')
 
 const routing = express.Router()
 
+
+//Checking if insured
+
+routing.get('/isInsured', passport.authenticate('jwt', {session: false}), async (req,res) =>{
+
+    const userID = req.user.user
+    const accountAddress = req.user.address
+    console.log(`[checking_insured] ${userID} -- ${accountAddress}`)
+    try {
+        const insured = await isInsured(accountAddress)
+        res.status(200).json({isInsured : insured})
+    }
+    catch { (res.status(500).json({err: "Check bulwark console."}))}
+})
 // Pay premium
 routing.get('/payPremium', passport.authenticate('jwt', {session: false}), async (req, res) => {
 
@@ -108,15 +123,15 @@ routing.post('/claim', passport.authenticate('jwt', {session: false}), (req, res
                                             })
                                     })
                                     .catch(err => {
-                                        res.status(500).json({ err: 'check bulwark console.' })
+                                        res.json({ err: 'check bulwark console.' })
                                         console.log(`[processing_claim] ${userID} -- ${accountAddress} contract-err`)
                                         console.log(err)
                                     })
-                            else res.status(403).json({ 'error': 'Invalid Account Address' })
+                            else res.json({ err: 'Invalid Account Address' })
                                 && console.log(`[processing_claim] ${userID} -- ${accountAddress} - Invalid Account Address`)
                         })
                         .catch(err => {
-                            res.status(500).json({ err: 'check bulwark console.' })
+                            res.json({ err: 'check bulwark console.' })
                             console.log(`[processing_claim] ${userID} -- ${accountAddress} contract-err`)
                             console.log(err)
                         })
@@ -127,6 +142,42 @@ routing.post('/claim', passport.authenticate('jwt', {session: false}), (req, res
                     console.log(err)
                     res.status(500).json({err: 'check bulwark console'})
                 }
+                
+            }
+        })
+
+})
+
+//Get transaction history by account
+
+
+//Get Transactions by account
+routing.get('/getTransactions', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    const userID = req.user.user
+    const accountAddress = req.user.address
+    console.log(accountAddress)
+    console.log(`[getting_ transactions] ${userID} -- ${accountAddress}`)
+    await transactions(accountAddress).then(data=>{res.status(200).json(data)});
+})
+
+routing.get('/getWeather', passport.authenticate('jwt', {session: false}), (req, res)=>{
+    const userID = req.user.user
+    const accountAddress = req.user.address
+
+    User.findById(userID)
+		.then(async user => {
+            if(!user) res.status(500).json({err: 'User not found.'}) && console.log(`[weather_forecast - user not found] ${userID}`)
+            else {
+                let {location} = user.insurance
+                console.log("Lat: "+location.lat+"\nLon: "+location.lon)
+                const data = await getWeatherForecast(location)
+                console.log(data.current)
+                const weather={
+                    temp: (data.current.temp-273.15).toFixed(1),
+                    humidity: data.current.humidity,
+                    info: data.current.weather[0].main
+                }
+                res.status(200).json(weather);
                 
             }
         })

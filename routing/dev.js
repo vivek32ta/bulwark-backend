@@ -33,7 +33,7 @@ routing.get('/getAccountBalance/:accountAddress', (req,res)=>{
     var accountAddress = req.params.accountAddress;
     web3.eth.getAccounts().then((allAccounts)=>{
         console.log("Checking Balance");
-
+        
         if(accountAddress!== null &&  allAccounts.includes(accountAddress))
         {
             web3.eth.getBalance(accountAddress).then((bal)=>{ 

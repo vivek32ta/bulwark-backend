@@ -66,9 +66,72 @@ const signUp = user =>
         }
     })
 
+const isInsured = address => 
+    new Promise (async function(resolve,reject) {
+        console.log(`[BULWARK get_balance] ${address}`)
+        try {
+            if(await accountCheck(address))
+                contract.methods.isInsured(address)
+                    .call()
+                    .then(insured => resolve(insured))
+                    .catch(err => reject(err))
+            else reject({err: `${address} is invalid.`})
+        } catch(err) {
+            reject(err)
+        }
+    })
+
+const transactions = (accountAddress) => {
+    return new Promise((resolve, reject) => {
+        var result = []
+        web3.eth.getBlockNumber().then(async (endBlockNumber) => {
+
+            console.log("Using endBlockNumber: " + endBlockNumber);
+
+            var startBlockNumber = endBlockNumber - 1000;
+            console.log("Using startBlockNumber: " + startBlockNumber);
+
+            console.log("Searching for transactions to/from account \"" + accountAddress + "\" within blocks " + startBlockNumber + " and " + endBlockNumber);
+
+            for (var i = startBlockNumber; i <= endBlockNumber; i++) {
+                if (i % 1000 == 0) { console.log("Searching block " + i); }
+
+                await web3.eth.getBlock(i, true).then(block => {
+                    if (block != null && block.transactions != null) {
+                        block.transactions.forEach(function (e) {
+                            if (accountAddress == "*" || accountAddress == e.from || accountAddress == e.to) {
+                                console.log("   nonce           : " + e.nonce + "\n"
+                                    + "   blockHash       : " + e.blockHash + "\n");
+
+                                var tx = {
+                                    txhash: e.hash,
+                                    blockHash: e.blockHash,
+                                    blockNumber: e.blockNumber,
+                                    transactionIndex: e.transactionIndex,
+                                    from: e.from,
+                                    to: e.to,
+                                    value: e.value,
+                                    time: new Date(block.timestamp * 1000).toLocaleString(),
+                                    gasPrice: e.gasPrice,
+                                    gas: e.gas,
+                                    input: e.input
+                                }
+                                result.push(tx)
+                            }
+                        })
+                    }
+                }).catch(err => { reject(err) })
+            }
+            resolve(result)
+        }).catch(err => { reject(err) })
+    })
+}
+
 module.exports = {
     accountCheck,
     getAccountBalance,
+    isInsured,
+    transactions,
     signUp,
     web3
 }
