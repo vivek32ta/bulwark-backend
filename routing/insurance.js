@@ -1,11 +1,11 @@
 
 const express = require('express')
 const router = express.Router()
-const fs = require('fs')
 const passport = require('passport')
 
-const {getJwtToken, getPremiumPrice, getResponsePayload} = require('../utilities/util.js')
+const User = require('../models/User')
 
+const {getJwtToken, getPremiumPrice, getResponsePayload} = require('../utilities/util.js')
 const {signUp} = require('../web3/bulwark-core.js')
 
 router.get('/new', passport.authenticate('jwt', {session: false}), (req, res) => {
@@ -15,6 +15,7 @@ router.get('/new', passport.authenticate('jwt', {session: false}), (req, res) =>
 
 	User.findById(userID)
 		.then(async user => {
+            console.log(user)
             if(!user) res.status(500).json({err: 'User not found.'}) && console.log(`[new_insurance - not found] ${userID}`)
             else {
                 const premiumAmount = await getPremiumPrice(user.insurance.coverage)

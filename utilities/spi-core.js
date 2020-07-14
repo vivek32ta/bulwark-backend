@@ -29,12 +29,11 @@ const calculateSPI = data => {
                 var sumPrcp=0;
                 allData.forEach(ele => { sumPrcp = sumPrcp + ele.prcp;  });
                 avgPrcp = (sumPrcp / allData.length)
-                //console.log("Average Precipitation: "+avgPrcp)
-
+                // console.log("Average Precipitation: "+avgPrcp)
 
                 axios.get("https://api.meteostat.net/v2/point/climate?lat="+lat+"&lon="+lon , {headers: {"x-api-key" : meteoStatAPI}})
                 .then(response => {
-                    //console.log("Normalised Precipitation: "+response.data.data[month-1].prcp)
+                    // console.log("Normalised Precipitation: "+response.data.data[month-1].prcp)
                     normalPrcp = response.data.data[month-1].prcp;
 
                     var sumsqPrcp, sd;
@@ -42,8 +41,7 @@ const calculateSPI = data => {
                     sd = Math.sqrt(sumsqPrcp/allData.length)
                     //console.log("SD: "+sd);
                     spi = (avgPrcp-(normalPrcp/26))/sd
-                    //console.log("Standardized Precipitation Index (SPI):"+spi);
-            
+                    // console.log("Standardized Precipitation Index (SPI):"+spi);
                     spiClass=-1;
                     if(spi>=2) { return 0}
                     else if((spi>=1.50) && (spi<2)) {spiClass = 1}

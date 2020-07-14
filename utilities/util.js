@@ -2,7 +2,7 @@ const axios = require("axios")
 const jwt = require('jsonwebtoken')
 
 const {	getAccountBalance }        = require('../web3/bulwark-core.js')
-const {SECRET_KEY, openWeatherMap} = require('../config/keys.js')
+const {SECRET_KEY, openWeatherMap, mapQuestAPI} = require('../config/keys.js')
 
 const getCurrentPrice = targetCurrency => new Promise(async (resolve, reject) => {
     try {
@@ -75,10 +75,19 @@ const getResponsePayload = async (user, token) => {
 }
 
 const getWeatherForecast = location => new Promise(async (resolve, reject) => {
-    
     try {
         const {lat, lon} = location
         const response   = await axios.get(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly&appid=${openWeatherMap}`)
+        resolve(response.data)
+    } catch(err) {
+        reject(err)
+    }
+})
+
+const reverseLocationLookup = location => new Promise(async (resolve, reject) => {
+    try {
+        const {lat, lon} = location
+        const response   = await axios.get(`http://open.mapquestapi.com/geocoding/v1/reverse?key=${mapQuestAPI}&location=${lat},${lon}&includeRoadMetadata=true&includeNearestIntersection=true`)
         resolve(response.data)
     } catch(err) {
         reject(err)
@@ -91,5 +100,6 @@ module.exports = {
     getJwtToken,
     getPremiumPrice,
     getResponsePayload,
-    getWeatherForecast
+    getWeatherForecast,
+    reverseLocationLookup
 }

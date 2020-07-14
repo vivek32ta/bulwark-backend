@@ -7,6 +7,7 @@ const path = require('path')
 const router = express.Router()
 const ADDR_PATH = path.resolve(__dirname, '../bulwark-data/address-and-keys')
 const User = require('../models/User')
+const Data = require('../models/Data')
 
 const {getJwtToken, getResponsePayload} = require('../utilities/util.js')
 
@@ -90,7 +91,12 @@ router.post('/new', (req, res) => {
 					)
 					.then(user => {
 						if(!user) res.json({err: 'Could not save. Try again later.'}) && console.log(`[register - save-err] ${email}`)
-						else res.json({msg: 'Successfully registered.'}) && console.log(`[register - success] ${email}`)
+						else {
+							new Data({ user: user._id })
+								.save()
+								.then(account => res.json({msg: 'Successfully registered.'}) && console.log(`[register - success] ${email}`))
+								.catch(err => console.log(err))
+						}
 					})
 					.catch(err => {
 						res.status(500).json({err: 'check bulwark console.'})

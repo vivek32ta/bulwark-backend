@@ -23,8 +23,9 @@ RUN apk update
 
 # dependencies
 RUN apk add bash
+RUN npm i -g truffle ganache-cli
 
-# clone back -end
+# clone back-end
 RUN mkdir -p /bulwark/app
 ARG CACHEBUST=1
 COPY . ./app
