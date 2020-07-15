@@ -124,6 +124,7 @@ router.post('/details', passport.authenticate('jwt', {session: false}), (req, re
 
 				insurance.insured = false
 				user.configured = true
+				insurance.interval = insurance.interval*30
 				user.insurance = insurance
 
 				return user.save()
