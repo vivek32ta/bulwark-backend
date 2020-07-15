@@ -202,7 +202,6 @@ routing.get('/deposit/:depositAmount/:accountAddress', (req,res)=>{
     console.log("Routing to deposit");
     var senderAddress = req.params.accountAddress;
     var depositAmount = req.params.depositAmount;
-    
     console.log("Depositing to contract");
     web3.eth.getAccounts().then((allAccounts)=>{
         if(senderAddress!== null &&  allAccounts.includes(senderAddress))
