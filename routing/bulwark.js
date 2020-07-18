@@ -92,7 +92,7 @@ routing.post('/claim', passport.authenticate('jwt', {session: false}), (req, res
 
                         const err = 'No catastrophe detected.'
                         claim.info = {err}
-                        claim.processed = false
+                        claim.status = 'fail'
 
                         Data.findOne({user: userID})
                             .then(data => {
@@ -109,9 +109,9 @@ routing.post('/claim', passport.authenticate('jwt', {session: false}), (req, res
                                     contract.methods.claim(spi)
                                         .send({ from: accountAddress })
                                         .then(receipt => {
-                                            console.log(`[processing_claim] claim processed ${userID}`)
+                                            console.log(`[processing_claim] claim submitted ${userID}`)
                                             claim.info = {...receipt}
-                                            claim.processed = true
+                                            claim.status = 'processing'
                                             console.log(claim)
                                             Data.findOne({user: userID})
                                                 .then(data => {

@@ -9,7 +9,7 @@ const abiFile = path.resolve(__dirname, '..' , 'contracts/Insurance_sol_Insuranc
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
 const abi  = JSON.parse(fs.readFileSync(abiFile).toString())
 const contract = new web3.eth.Contract(abi)
-contract.options.address = "0xC09B8928374de2070f6B8F1Fd6E94A9Ea56D9d88"
+contract.options.address = "0xC20438E190113590aB9A569d6045175F4f0e60E4"
 
 const accountCheck = address =>
     new Promise(function(resolve, reject) {
@@ -81,6 +81,47 @@ const isInsured = address =>
         }
     })
 
+const getPremium = (address, acc = false) =>
+    new Promise (async function(resolve, reject) {
+        console.log(`[BULWARK get_premium] ${address}`)
+        try {
+            if(acc || (!acc && await accountCheck(address)))
+                contract.methods.getPremium(address)
+                    .call()
+                    .then(premium => {
+                        console.log(`[BULWARK get_premium] success ${address}`)
+                        resolve(premium)
+                    })
+                    .catch(err => {throw new Error(err)})
+        } catch(err) {
+            console.log(`[BULWARK get_premium] failure ${address}`)
+            reject(err)
+        }
+
+    })
+
+const payPremium = address =>
+    new Promise (async function(resolve, reject) {
+        console.log(`[BULWARK pay_premium] ${address}`)
+        try {
+            if(await accountCheck(address)) {
+                const premium = await getPremium(address, true)
+                contract.methods.payPremium(address)
+                    .send({ from  : address
+                          , value : premium })
+                    .then(receipt => {
+                        console.log(`[BULWARK pay_premium] success ${address}`)
+                        receipt.amount_paid = web3.utils.fromWei(premium, 'ether')
+                        resolve(receipt)
+                    })
+                    .catch(err => {throw new Error(err)})
+            }
+        } catch(err) {
+            console.log(`[BULWARK pay_premium] failure ${address}`)
+            reject(err)
+        }
+    })
+
 const transactions = (accountAddress) => {
     return new Promise((resolve, reject) => {
         var result = []
@@ -129,6 +170,8 @@ const transactions = (accountAddress) => {
 
 module.exports = {
     accountCheck,
+    payPremium,
+    getPremium,
     getAccountBalance,
     isInsured,
     transactions,

@@ -61,7 +61,7 @@ const getResponsePayload = async (user, token) => {
     temp.id = user._id
     temp.token = 'Bearer ' + token
 
-    if(temp.configured && !temp.insurance.insured)
+    if(temp.configured)
         temp.payPremium = await getPremiumPrice(temp.insurance.coverage)
     try {
         if(temp.configured && temp.insurance.insured)

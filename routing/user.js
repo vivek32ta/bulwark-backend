@@ -115,13 +115,16 @@ router.post('/details', passport.authenticate('jwt', {session: false}), (req, re
 
     const {insurance} = req.body
 	const userID = req.user.user
-    console.log(`[save_details] ${userID}`)
+	console.log(`[save_details] ${userID}`)
+	console.log(insurance)
 
 	User.findById(userID)
 		.then(user => {
 			if(!user) res.status(500).json({err: 'User not found.'}) && console.log(`[save_details - not found] ${userID}`)
 			else {
 
+				user.name = insurance.name
+				delete insurance.name
 				insurance.insured = false
 				user.configured = true
 				insurance.interval = insurance.interval*30
