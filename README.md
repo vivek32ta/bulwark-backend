@@ -1,38 +1,52 @@
-# Bulwark Backend
-[Contributors](#developed-by)
-## REST Enpoints
+![](https://github.com/kashif-m/bulwark-frontend/blob/master/src/assets/images/bulwarklogo.svg?raw=true)
+# Bulwark Server
 
-#### Creating a New Policy: 
-Request Body (JSON): 
+> Bulwark is a blockchain based Agricultural Insurance dApp. (de-centralized application)
+------------
+This repo is a server for the Bulwark [web application](https://github.com/kashif-m/bulwark-frontend).
+
+### REST Enpoints
+
+##### Authentication: 
+Use it to get the bearer token and authenticate all the other calls.
 ```bash
-[POST] /signUp/<Account Address>
+[POST] /user/login/
 
-{"customerName":<Customer Name>, "vehicleNo":<Vehicle Number>}
+{"email":<Registered Email>, "password":<Password>}
 ````
 
-#### Checking Account Balance: 
-`[GET] /getAccountBalance/<Account Address>`
+##### Retrieving all transactions for the account: 
+`[GET] /bulwark/getTransactions/`
 
-#### Is Account Insured: 
-`[GET] /isInsured/<Account Address>`
+##### Check Insurance status: 
+`[GET] /bulwark/isInsured/`
 
-#### Pay Premium: 
-`[GET] /payPremium/<Account Address>`
+##### Pay Premium: 
+`[GET] /bulwark/payPremium/`
 
-#### Claim Policy: 
-`[GET] /claim/<Account Address>`
+##### Claim Policy: 
+`[GET] /bulwark/claim/`
+
+##### Get Current Weather: 
+`[GET] /bulwark/weather/`
+
+------------
 
 
 
-
-
-
-## Setup
+### Setup
+* [Docker](#Docker)
 * [Linux](#Linux)
-* [Windows](#Windows)
+
+##### Docker
+* Install [Docker](https://docs.docker.com/get-docker/) for your system.
+* Run `docker-compose up`
+
+For WebApp: Setup [bulwark-frontend](https://github.com/kashif-m/bulwark-frontend).
+For API Endpoints: Open a REST Client and give it a spin.
 
 
-### Linux
+##### Linux
 
 Use the package manager npm to install all packages and start the blockchain.
 
@@ -43,22 +57,9 @@ npm run bulwark:start
 ```
 The server will run at port 5000. Give it a spin using a REST Client.
 
-### Windows
-Use `npm install` to install all packages.
+------------
 
-Fire up Ganache.
-
-Run `
-node initialize-chain.js` and copy the contract address (i.e., the one after the 10 address array) printed on the console. (*This will create a contract.*)
-
-
-Go to `./routes/routing.js ` and paste the contract address.
-
-`node app.js` will start the server at [http://localhost:5000](http://localhost:5000).
-
-Open a REST Client and give it a spin.
-
-### Developed By
+### Developers
 * [Kashif M](https://github.com/kashif-m)
 * [Sohini Sahukar](https://github.com/sohinisahukar)
 * [Vivek T A](https://github.com/vivek32ta)
