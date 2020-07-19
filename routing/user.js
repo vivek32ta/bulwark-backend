@@ -10,6 +10,7 @@ const User = require('../models/User')
 const Data = require('../models/Data')
 
 const {getJwtToken, getResponsePayload} = require('../utilities/util.js')
+const {validateLogin, validateSignUp, validateDetails} = require('../utilities/validate.js')
 
 // routes
 router.get('/', passport.authenticate('jwt', {session: false}), (req, res) => {
@@ -40,7 +41,12 @@ router.get('/', passport.authenticate('jwt', {session: false}), (req, res) => {
 
 router.post('/login', (req, res) => {
 
-	const {email, password} = req.body
+	const payload = req.body.user
+	const {isLegit, err, msg} = validateLogin(payload)
+	if(!isLegit) return res.status(500).json({msg: msg, err})
+
+
+	const {email, password} = payload
 	console.log(`[login] ${email}`)
 
 	User.findOne({email})
@@ -48,7 +54,7 @@ router.post('/login', (req, res) => {
 			if(!_user) res.status(500).json({err: 'User not found.'}) && console.log(`[login - not found] ${email}`)
 			else bcrypt.compare(password, _user.password)
 					.then(async matched => {
-						if(!matched) res.status(500).json({err: 'Wrong password.'}) && console.log(`[login - wrong password] ${email}`)
+						if(!matched) res.status(500).json({msg: 'Wrong password.'}) && console.log(`[login - wrong password] ${email}`)
 						else try {
 								const payload = { user: _user._id }
 								if(_user.configured && _user.insurance.insured) payload.address = _user.keys.public
@@ -74,12 +80,17 @@ router.post('/login', (req, res) => {
 
 router.post('/new', (req, res) => {
 
-	const {email, password, name} = req.body
+	const payload = req.body.user
+	const {isLegit, err, msg} = validateSignUp(payload)
+	if(!isLegit) return res.status(500).json({msg, err})
+
+
+	const {email, password, name}  = payload
 	console.log(`[register - new] ${email}`)
 
 	User.findOne({email})
 		.then(user => {
-			if(user) res.status(500).json({err: 'User already exists.'}) && console.log(`[register - pre-exists] ${email}`)
+			if(user) res.status(500).json({msg: 'User already exists.'}) && console.log(`[register - pre-exists] ${email}`)
 			else bcrypt.genSalt(10)
 					.then(salt => bcrypt.hash(password, salt))
 					.then(hash =>
@@ -90,7 +101,7 @@ router.post('/new', (req, res) => {
 						}).save()
 					)
 					.then(user => {
-						if(!user) res.json({err: 'Could not save. Try again later.'}) && console.log(`[register - save-err] ${email}`)
+						if(!user) res.json({msg: 'Could not save. Try again later.'}) && console.log(`[register - save-err] ${email}`)
 						else {
 							new Data({ user: user._id })
 								.save()
@@ -99,13 +110,13 @@ router.post('/new', (req, res) => {
 						}
 					})
 					.catch(err => {
-						res.status(500).json({err: 'check bulwark console.'})
+						res.status(500).json({msg: 'check bulwark console.'})
 						console.log(`[register - err] ${email}`)
 						console.log(err)
 					})
 		})
 		.catch(err => {
-			res.status(500).json({err: '[err] check bulwark console.'})
+			res.status(500).json({msg: 'check bulwark console.'})
 			console.log(`[register - err] ${email}`)
 			console.log(err)
 		})
@@ -113,14 +124,18 @@ router.post('/new', (req, res) => {
 
 router.post('/details', passport.authenticate('jwt', {session: false}), (req, res) => {
 
-    const {insurance} = req.body
+	const payload = req.body.insurance
+	const {isLegit, err, msg} = validateDetails(payload)
+	if(!isLegit) return res.status(500).json({msg, err})
+
+
+	const insurance = payload
 	const userID = req.user.user
 	console.log(`[save_details] ${userID}`)
-	console.log(insurance)
 
 	User.findById(userID)
 		.then(user => {
-			if(!user) res.status(500).json({err: 'User not found.'}) && console.log(`[save_details - not found] ${userID}`)
+			if(!user) res.status(500).json({msg: 'User not found.'}) && console.log(`[save_details - not found] ${userID}`)
 			else {
 
 				user.name = insurance.name
@@ -152,7 +167,7 @@ router.post('/details', passport.authenticate('jwt', {session: false}), (req, re
 		.catch(err => {
 			console.log(`[save_details - err] ${userID}`)
 			console.log(err)
-			res.status(500).json({err: 'check bulwark console.'})
+			res.status(500).json({msg: 'check bulwark console.'})
 		})
 })
 
@@ -164,7 +179,7 @@ router.get('/claims', passport.authenticate('jwt', {session: false}), (req, res)
 		.then(data => {
 			if(!data) {
 				console.log(`[get-claims] not found`)
-				res.status(400).json({err: 'No data, bro.'})
+				res.status(400).json({msg: 'No data, bro.'})
 			}
 			else {
 				console.log(`[get-claims] done`)
