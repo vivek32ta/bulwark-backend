@@ -2,6 +2,7 @@
 const fs   = require("fs")
 const path = require('path')
 const Web3 = require('web3')
+const {getCurrentPrice} = require('../utilities/util.js')
 
 //Web3 Configuration
 const abiFile = path.resolve(__dirname, '..' , 'contracts/Insurance_sol_Insurance.abi')
@@ -9,7 +10,7 @@ const abiFile = path.resolve(__dirname, '..' , 'contracts/Insurance_sol_Insuranc
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
 const abi  = JSON.parse(fs.readFileSync(abiFile).toString())
 const contract = new web3.eth.Contract(abi)
-contract.options.address = "0xC20438E190113590aB9A569d6045175F4f0e60E4"
+contract.options.address = "0xC09B8928374de2070f6B8F1Fd6E94A9Ea56D9d88"
 
 const accountCheck = address =>
     new Promise(function(resolve, reject) {
@@ -131,6 +132,7 @@ const transactions = (accountAddress) => {
 
             var startBlockNumber = endBlockNumber - 1000;
             console.log("Using startBlockNumber: " + startBlockNumber);
+            var rate = await getCurrentPrice('inr')
 
             console.log("Searching for transactions to/from account \"" + accountAddress + "\" within blocks " + startBlockNumber + " and " + endBlockNumber);
 
@@ -143,6 +145,7 @@ const transactions = (accountAddress) => {
                             if (accountAddress == "*" || accountAddress == e.from || accountAddress == e.to) {
                                 console.log("   nonce           : " + e.nonce + "\n"
                                     + "   blockHash       : " + e.blockHash + "\n");
+                                
 
                                 var tx = {
                                     txhash: e.hash,
@@ -151,7 +154,7 @@ const transactions = (accountAddress) => {
                                     transactionIndex: e.transactionIndex,
                                     from: e.from,
                                     to: e.to,
-                                    value: e.value,
+                                    value: (rate * web3.utils.fromWei(e.value,'ether')).toFixed(2)+" INR",
                                     time: new Date(block.timestamp * 1000).toLocaleString(),
                                     gasPrice: e.gasPrice,
                                     gas: e.gas,

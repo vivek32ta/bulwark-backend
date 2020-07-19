@@ -96,6 +96,7 @@ const reverseLocationLookup = location => new Promise(async (resolve, reject) =>
 
 module.exports = {
     convertCurrency,
+    getCurrentPrice,
     getPremiumPrice,
     getJwtToken,
     getPremiumPrice,
