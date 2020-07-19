@@ -127,24 +127,16 @@ const transactions = (accountAddress) => {
     return new Promise((resolve, reject) => {
         var result = []
         web3.eth.getBlockNumber().then(async (endBlockNumber) => {
-
-            console.log("Using endBlockNumber: " + endBlockNumber);
-
             var startBlockNumber = endBlockNumber - 1000;
-            console.log("Using startBlockNumber: " + startBlockNumber);
             var rate = await getCurrentPrice('inr')
 
-            console.log("Searching for transactions to/from account \"" + accountAddress + "\" within blocks " + startBlockNumber + " and " + endBlockNumber);
-
             for (var i = startBlockNumber; i <= endBlockNumber; i++) {
-                if (i % 1000 == 0) { console.log("Searching block " + i); }
+                if (i % 1000 == 0) { console.log("[transactions] Getting transactions"); }
 
                 await web3.eth.getBlock(i, true).then(block => {
                     if (block != null && block.transactions != null) {
                         block.transactions.forEach(function (e) {
                             if (accountAddress == "*" || accountAddress == e.from || accountAddress == e.to) {
-                                console.log("   nonce           : " + e.nonce + "\n"
-                                    + "   blockHash       : " + e.blockHash + "\n");
                                 
 
                                 var tx = {
