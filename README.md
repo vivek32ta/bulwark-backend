@@ -14,10 +14,6 @@ Use it to get the bearer token and authenticate all the other calls.
 
 {"email":<Registered Email>, "password":<Password>}
 ````
-
-##### Retrieving all transactions for the account: 
-`[GET] /bulwark/getTransactions/`
-
 ##### Check Insurance status: 
 `[GET] /bulwark/isInsured/`
 
@@ -26,6 +22,12 @@ Use it to get the bearer token and authenticate all the other calls.
 
 ##### Claim Policy: 
 `[GET] /bulwark/claim/`
+
+##### Retrieving all transactions for the account: 
+`[GET] /bulwark/getTransactions/`
+
+##### Retrieving complete blockchain: 
+`[GET] /bulwark/getBlockchain/`
 
 ##### Get Current Weather: 
 `[GET] /bulwark/weather/`
