@@ -10,7 +10,7 @@ const abiFile = path.resolve(__dirname, '..' , 'contracts/Insurance_sol_Insuranc
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
 const abi  = JSON.parse(fs.readFileSync(abiFile).toString())
 const contract = new web3.eth.Contract(abi)
-contract.options.address = "0xC09B8928374de2070f6B8F1Fd6E94A9Ea56D9d88"
+contract.options.address = "0xD4aB03F5120465105C66a9ECB96DE088F4bCE22B"
 
 const accountCheck = address =>
     new Promise(function(resolve, reject) {
@@ -123,53 +123,12 @@ const payPremium = address =>
         }
     })
 
-const transactions = (accountAddress) => {
-    return new Promise((resolve, reject) => {
-        var result = []
-        web3.eth.getBlockNumber().then(async (endBlockNumber) => {
-            var startBlockNumber = endBlockNumber - 1000;
-            var rate = await getCurrentPrice('inr')
-
-            for (var i = startBlockNumber; i <= endBlockNumber; i++) {
-                if (i % 1000 == 0) { console.log("[transactions] Getting transactions"); }
-
-                await web3.eth.getBlock(i, true).then(block => {
-                    if (block != null && block.transactions != null) {
-                        block.transactions.forEach(function (e) {
-                            if (accountAddress == "*" || accountAddress == e.from || accountAddress == e.to) {
-                                
-
-                                var tx = {
-                                    txhash: e.hash,
-                                    blockHash: e.blockHash,
-                                    blockNumber: e.blockNumber,
-                                    transactionIndex: e.transactionIndex,
-                                    from: e.from,
-                                    to: e.to,
-                                    value: (rate * web3.utils.fromWei(e.value,'ether')).toFixed(2)+" INR",
-                                    time: new Date(block.timestamp * 1000).toLocaleString(),
-                                    gasPrice: e.gasPrice,
-                                    gas: e.gas,
-                                    input: e.input
-                                }
-                                result.push(tx)
-                            }
-                        })
-                    }
-                }).catch(err => { reject(err) })
-            }
-            resolve(result)
-        }).catch(err => { reject(err) })
-    })
-}
-
 module.exports = {
     accountCheck,
     payPremium,
     getPremium,
     getAccountBalance,
     isInsured,
-    transactions,
     signUp,
     web3
 }

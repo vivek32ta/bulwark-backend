@@ -1,67 +1,14 @@
 
 const express  = require('express')
-const mongoose = require('mongoose')
 const passport = require('passport')
 
-const {web3, isInsured, transactions} = require('../web3/bulwark-core.js')
-const {getWeatherForecast} = require('../utilities/util.js')
+const {web3, isInsured} = require('../web3/bulwark-core.js')
+const {getCurrentPrice} = require('../utilities/util.js')
 const {calculateSPI} = require('../utilities/spi-core.js')
 const Data           = require('../models/Data')
 const User           = require('../models/User')
 
 const routing = express.Router()
-
-
-//Checking if insured
-routing.get('/isInsured', passport.authenticate('jwt', {session: false}), async (req,res) =>{
-
-    const userID = req.user.user
-    const accountAddress = req.user.address
-    console.log(`[checking_insured] ${userID} -- ${accountAddress}`)
-    try {
-        const insured = await isInsured(accountAddress)
-        res.status(200).json({isInsured : insured})
-    }
-    catch { (res.status(500).json({err: "Check bulwark console."}))}
-})
-// Pay premium
-routing.get('/payPremium', passport.authenticate('jwt', {session: false}), async (req, res) => {
-
-    const userID = req.user.user
-    const accountAddress = req.user.address
-    console.log(`[paying_premium] ${userID} -- ${accountAddress}`)
-
-    if(!accountAddress) return res.json({err: 'User not registered on Bulwark.'})
-    console.log("Paying Premium")
-
-    web3.eth.getAccounts()
-         .then(allAccounts => {
-            if(accountAddress && allAccounts.includes(accountAddress))
-                contract.methods.getPremium(accountAddress)
-                    .call()
-                    .then((premium)=>{
-                        console.log("Premium: "+web3.utils.fromWei(premium,'ether')); 
-
-                        contract.methods.payPremium(accountAddress)
-                        .send({ from: accountAddress
-                                ,value: premium })
-                            .then((receipt)=>{res.json(receipt)})
-                            .catch(err => {
-                                res.status(500).json({err: 'check bulwark console.'})
-                                console.log(`[paying_premium] ${userID} -- ${accountAddress} contract-err`)
-                                console.log(err)
-                            })
-                    })
-            else res.status(403).json({'error':'Invalid Account Address'})
-                 && console.log(`[paying_premium] ${userID} -- ${accountAddress} - Invalid Account Address`)
-        })
-        .catch(err => {
-            res.status(500).json({err: 'check bulwark console.'})
-            console.log(`[paying_premium] ${userID} -- ${accountAddress} contract-err`)
-            console.log(err)
-        })
-})
-
 
 // Issue a claim
 routing.post('/claim', passport.authenticate('jwt', {session: false}), (req, res) => {
@@ -141,7 +88,45 @@ routing.post('/claim', passport.authenticate('jwt', {session: false}), (req, res
 })
 
 //Get transaction history by account
+const transactions = (accountAddress) => {
+    return new Promise((resolve, reject) => {
+        var result = []
+        web3.eth.getBlockNumber().then(async (endBlockNumber) => {
+            var startBlockNumber = endBlockNumber - 1000;
+            var rate = await getCurrentPrice('inr')
 
+            for (var i = startBlockNumber; i <= endBlockNumber; i++) {
+                if (i % 1000 == 0) { console.log("[transactions] Getting transactions"); }
+
+                await web3.eth.getBlock(i, true).then(block => {
+                    if (block != null && block.transactions != null) {
+                        block.transactions.forEach(function (e) {
+                            if (accountAddress == "*" || accountAddress == e.from || accountAddress == e.to) {
+                                
+
+                                var tx = {
+                                    txhash: e.hash,
+                                    blockHash: e.blockHash,
+                                    blockNumber: e.blockNumber,
+                                    transactionIndex: e.transactionIndex,
+                                    from: e.from,
+                                    to: e.to,
+                                    value: (rate * web3.utils.fromWei(e.value,'ether')).toFixed(2)+" INR",
+                                    time: new Date(block.timestamp * 1000).toLocaleString(),
+                                    gasPrice: e.gasPrice,
+                                    gas: e.gas,
+                                    input: e.input
+                                }
+                                result.push(tx)
+                            }
+                        })
+                    }
+                }).catch(err => { reject(err) })
+            }
+            resolve(result)
+        }).catch(err => { reject(err) })
+    })
+}
 
 //Get Transactions by account
 routing.get('/getTransactions', passport.authenticate('jwt', {session: false}), async (req, res) => {
@@ -150,30 +135,6 @@ routing.get('/getTransactions', passport.authenticate('jwt', {session: false}), 
     console.log(accountAddress)
     console.log(`[getting_ transactions] ${userID} -- ${accountAddress}`)
     await transactions(accountAddress).then(data=>{res.status(200).json(data)});
-})
-
-routing.get('/getWeather', passport.authenticate('jwt', {session: false}), (req, res)=>{
-    const userID = req.user.user
-    const accountAddress = req.user.address
-
-    User.findById(userID)
-		.then(async user => {
-            if(!user) res.status(500).json({err: 'User not found.'}) && console.log(`[weather_forecast - user not found] ${userID}`)
-            else {
-                let {location} = user.insurance
-                console.log("Lat: "+location.lat+"\nLon: "+location.lon)
-                const data = await getWeatherForecast(location)
-                console.log(data.current)
-                const weather={
-                    temp: (data.current.temp-273.15).toFixed(1),
-                    humidity: data.current.humidity,
-                    info: data.current.weather[0].main
-                }
-                res.status(200).json(weather);
-                
-            }
-        })
-
 })
 
 module.exports = routing
