@@ -137,4 +137,39 @@ routing.get('/getTransactions', passport.authenticate('jwt', {session: false}), 
     await transactions(accountAddress).then(data=>{res.status(200).json(data)});
 })
 
+//Get transaction history by account
+const blockchain = () => {
+    return new Promise((resolve, reject) => {
+        var result = []
+        web3.eth.getBlockNumber().then(async (endBlockNumber) => {
+            var startBlockNumber = endBlockNumber - 1000;
+            for (var i = startBlockNumber; i <= endBlockNumber; i++) {
+                if (i % 1000 == 0) { console.log("[blockchain] Getting the entire chain"); }
+
+                await web3.eth.getBlock(i, true).then(block => {
+                    if (block != null && block.transactions != null) {
+                        block.transactions.forEach(function (e) {
+                            var tx = {
+                                txhash: e.hash,
+                                blockNumber: e.blockNumber,
+                                time: new Date(block.timestamp * 1000).toLocaleString()
+                            }
+                            result.push(tx)
+                        })
+                    }
+                }).catch(err => { reject(err) })
+            }
+            resolve(result)
+        }).catch(err => { reject(err) })
+    })
+}
+
+routing.get('/getBlockchain', passport.authenticate('jwt', {session: false}), async (req, res) => {
+    const userID = req.user.user
+    const accountAddress = req.user.address
+    console.log(`[getting_chain] ${userID} -- ${accountAddress}`)
+    await blockchain().then(data=>{res.status(200).json(data)});
+})
+
+
 module.exports = routing

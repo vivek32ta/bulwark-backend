@@ -2,7 +2,6 @@
 const fs   = require("fs")
 const path = require('path')
 const Web3 = require('web3')
-const {getCurrentPrice} = require('../utilities/util.js')
 
 //Web3 Configuration
 const abiFile = path.resolve(__dirname, '..' , 'contracts/Insurance_sol_Insurance.abi')
@@ -10,7 +9,7 @@ const abiFile = path.resolve(__dirname, '..' , 'contracts/Insurance_sol_Insuranc
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
 const abi  = JSON.parse(fs.readFileSync(abiFile).toString())
 const contract = new web3.eth.Contract(abi)
-contract.options.address = "0xD4aB03F5120465105C66a9ECB96DE088F4bCE22B"
+contract.options.address = "0xC09B8928374de2070f6B8F1Fd6E94A9Ea56D9d88"
 
 const accountCheck = address =>
     new Promise(function(resolve, reject) {
