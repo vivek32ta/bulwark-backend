@@ -44,14 +44,14 @@ const calculateSPI = data => {
                     spi = (avgPrcp-(normalPrcp/26))/sd
                     console.log("Standardized Precipitation Index (SPI):"+spi);
                     spiClass=-1;
-                    if(spi>=2) { return 0}
-                    else if((spi>=1.50) && (spi<2)) {spiClass = 1}
-                    else if((spi>=1) && (spi<1.5)) {spiClass = 2}
-                    else if((spi>=-1) && (spi<1)) {spiClass = 3}
-                    else if((spi>=-1.5) && (spi<-1)) {spiClass = 4}
-                    else if((spi>=-2) && (spi<-1.5)) {spiClass = 5}
-                    else if(spi<=-2) {spiClass = 6}
-                    else {spiClass=-1}
+                    if(spi>=2) spiClass = 0
+                    else if((spi>=1.50) && (spi<2))   spiClass = 1
+                    else if((spi>=1) && (spi<1.5))    spiClass = 2
+                    else if((spi>=-1) && (spi<1))     spiClass = 3
+                    else if((spi>=-1.5) && (spi<-1))  spiClass = 4
+                    else if((spi>=-2) && (spi<-1.5))  spiClass = 5
+                    else if(spi<=-2) spiClass = 6
+                    else spiClass= -1
                     console.log("SPI Class: "+spiClass);
                     return spiClass;
             })

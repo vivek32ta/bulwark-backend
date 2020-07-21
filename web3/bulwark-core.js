@@ -9,7 +9,7 @@ const abiFile = path.resolve(__dirname, '..' , 'contracts/Insurance_sol_Insuranc
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
 const abi  = JSON.parse(fs.readFileSync(abiFile).toString())
 const contract = new web3.eth.Contract(abi)
-contract.options.address = "0xC09B8928374de2070f6B8F1Fd6E94A9Ea56D9d88"
+contract.options.address = "0x481de3F156D145A5E161a0B16E13dC4dD64139E0"
 
 const accountCheck = address =>
     new Promise(function(resolve, reject) {

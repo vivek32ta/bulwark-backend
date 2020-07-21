@@ -2,7 +2,7 @@
 const express  = require('express')
 const passport = require('passport')
 
-const {web3, isInsured} = require('../web3/bulwark-core.js')
+const {web3} = require('../web3/bulwark-core.js')
 const {getCurrentPrice} = require('../utilities/util.js')
 const {calculateSPI} = require('../utilities/spi-core.js')
 const Data           = require('../models/Data')
@@ -58,7 +58,8 @@ routing.post('/claim', passport.authenticate('jwt', {session: false}), (req, res
                                         .then(receipt => {
                                             console.log(`[processing_claim] claim submitted ${userID}`)
                                             claim.info = {...receipt}
-                                            claim.status = 'processing'
+                                            claim.status = 'success'
+                                            claim.processed = true
                                             console.log(claim)
                                             Data.findOne({user: userID})
                                                 .then(data => {
@@ -102,7 +103,6 @@ const transactions = (accountAddress) => {
                     if (block != null && block.transactions != null) {
                         block.transactions.forEach(function (e) {
                             if (accountAddress == "*" || accountAddress == e.from || accountAddress == e.to) {
-                                
 
                                 var tx = {
                                     txhash: e.hash,
