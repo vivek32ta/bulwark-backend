@@ -47,7 +47,7 @@ const validateAadhar = aadhar => {
     let err = false
     if(isEmpty(aadhar))
         err = 'Enter your aadhar number.'
-    else if(!aadhar.match(/[0-9]{16}/))
+    else if(!aadhar.match(/[0-9]{12}/))
         err = 'Enter valid aadhar number.'
 
     return err

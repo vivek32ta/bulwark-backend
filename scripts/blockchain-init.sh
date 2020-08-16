@@ -16,7 +16,7 @@ then
     echo "Depositing 50ETH to contract address"
 
     res=000
-    while [ $res = 000 ]
+    while [ "$res" = 000 ]
     do sleep 1 && res=$(curl -X GET http://localhost:5000/dev/deposit/50/$AccountAddr -w "%{http_code}"); done
 
     echo "Everything's set up"

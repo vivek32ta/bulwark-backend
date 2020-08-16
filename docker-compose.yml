@@ -8,11 +8,12 @@ services:
       dockerfile: Dockerfile
       args:
         CACHEBUST          : "${CACHEBUST}"
-        NODE_ENV           : "${NODE_ENV}"
-        MONGO_URI          : "${MONGO_URI}"
-        SECRET_KEY         : "${SECRET_KEY}"
+        MAPQUEST_API       : "${MAPQUEST_API}"
         METEO_STAT_API     : "${METEO_STAT_API}"
+        MONGO_URI          : "${MONGO_URI}"
+        NODE_ENV           : "${NODE_ENV}"
         OPEN_WEATHERMAP_ID : "${OPEN_WEATHERMAP_ID}"
+        SECRET_KEY         : "${SECRET_KEY}"
     ports:
       - "5000:5000"
     links:
