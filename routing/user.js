@@ -5,7 +5,7 @@ const passport = require('passport')
 const path = require('path')
 
 const router = express.Router()
-const ADDR_PATH = path.resolve(__dirname, '../bulwark-data/address-and-keys')
+const ADDR_PATH = path.resolve(__dirname, '../web3/addresses')
 const User = require('../models/User')
 const Data = require('../models/Data')
 
@@ -207,16 +207,15 @@ router.get('/dev:keys', passport.authenticate('jwt', {session: false}), (req, re
                             res.status(500).json({err: 'Accounts full.'})
                             console.log(`[dev-keys] ${userID} - err : address and keys empty`)
                         } else {
-                            const private = data.match(/0x.{64}/)[0]
                             const public = data.match(/0x.{40}/)[0]
                             const keys = {
-                                private,
+                                private: 'not saving this.',
 								public,
 								dev: true
                             }
 
                             user.keys = keys
-                            updatedData = data.split('\n').filter(line => !(line.match(private) || line.match(public))).join('\n')
+                            updatedData = data.split('\n').filter(line => !line.match(public)).join('\n')
 							fs.promises.writeFile(ADDR_PATH, updatedData)
 
 							return user.save()

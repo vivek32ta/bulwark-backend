@@ -7,30 +7,29 @@
   "axios": "^0.19.2",
   "bcryptjs": "^2.4.3",
   "body-parser": "^1.19.0",
-  "concurrently": "^5.2.0",
+  "concurrently": "^5.3.0",
   "cors": "^2.8.5",
   "express": "^4.17.1",
   "fs": "^0.0.1-security",
-  "ganache-cli": "^6.9.1",
   "jsonwebtoken": "^8.5.1",
-  "mongoose": "^5.9.14",
+  "mongoose": "^5.10.0",
   "node-metamask": "^1.1.2",
   "passport": "^0.4.1",
   "passport-jwt": "^4.0.0",
-  "truffle": "^5.1.26",
+  "truffle": "^5.1.40",
   "validator": "^13.1.1",
-  "web3": "^1.2.7",
-  "web3-net": "^1.2.9"
+  "web3": "^1.2.11",
+  "web3-net": "^1.2.11"
  },
  "devDependencies": {
-  "nodemon": "^2.0.3"
+  "nodemon": "^2.0.4"
  },
  "scripts": {
   "ganache": "ganache-cli --networkId $npm_package_config_ganache_networkID --allowUnlimitedContractSize --gasLimit $npm_package_config_ganache_gasLimit --gasPrice $npm_package_config_ganache_gasPrice --mnemonic \"$MNEMONIC\"",
   "migrate": "rm -rf build && truffle migrate --reset --compile-all --network ganache",
-  "blockchain:start": "concurrently \"npm run ganache > bulwark-data/ganache-output\" \"npm run migrate && npm run blockchain:initialize\"",
+  "blockchain:start": "npm run blockchain:initialize && npm run migrate",
   "blockchain:initialize": "bash scripts/blockchain-init.sh",
-  "bulwark:start": "bash scripts/init.sh",
+  "bulwark:start": "concurrently \"bash scripts/init.sh\" \"npm run blockchain:start\"",
   "database:clean": "node scripts/cleanDB.js",
   "server:dev": "nodemon app.js",
   "server:listen": "node app.js"

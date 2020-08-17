@@ -4,12 +4,34 @@ const path = require('path')
 const Web3 = require('web3')
 
 //Web3 Configuration
-const abiFile = path.resolve(__dirname, '..' , 'contracts/Insurance_sol_Insurance.abi')
-
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
-const abi  = JSON.parse(fs.readFileSync(abiFile).toString())
+
+const abiFile  = path.resolve(__dirname, '..' , 'contracts/Insurance_sol_Insurance.abi')
+const abi      = JSON.parse(fs.readFileSync(abiFile).toString())
 const contract = new web3.eth.Contract(abi)
-contract.options.address = "0xC3D5777E7f1Eb0b4E1bfe67a0ED5f6AB6Edf302A"
+contract.options.address = "0x17FE0F4F03F15addB06e3150f1e1c30Ada9878C9"
+
+const deployContract = from =>
+    new Promise(function(resolve, reject) {
+        const bytecode = fs.readFileSync(__dirname + "/../contracts/Insurance_sol_Insurance.bin").toString()
+        const abi      = JSON.parse(fs.readFileSync(__dirname + "/../contracts/Insurance_sol_Insurance.abi").toString())
+        new web3.eth.Contract(abi)
+            .deploy({ data: bytecode })
+            .send({
+                from,
+                gas: 1500000,
+                gasPrice: web3.utils.toWei('0.00003', 'ether')
+            })
+            .then(newContractInstance => resolve(newContractInstance))
+            .catch(err => reject(err))
+    })
+
+const getAccounts = () =>
+    new Promise(function(resolve, reject) {
+        web3.eth.getAccounts()
+            .then(acc => resolve(acc))
+            .catch(err => reject(err))
+    })
 
 const accountCheck = address =>
     new Promise(function(resolve, reject) {
@@ -122,6 +144,7 @@ const payPremium = address =>
         }
     })
 
+
 module.exports = {
     accountCheck,
     payPremium,
@@ -129,5 +152,8 @@ module.exports = {
     getAccountBalance,
     isInsured,
     signUp,
-    web3
+    web3,
+    // initial
+    deployContract,
+    getAccounts
 }

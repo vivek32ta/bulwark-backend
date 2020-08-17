@@ -1,14 +1,15 @@
-FROM node:12.8.0-alpine
+FROM node:12.8.0-slim
 
 USER root
-
-RUN echo 'http://dl-cdn.alpinelinux.org/alpine/v3.6/main' >> /etc/apk/repositories
-RUN echo 'http://dl-cdn.alpinelinux.org/alpine/v3.6/community' >> /etc/apk/repositories
-RUN apk update
+RUN apt update
 
 # dependencies
-RUN apk add bash curl
-RUN npm i -g truffle ganache-cli
+RUN apt install -y bash curl make python python3 g++
+
+# npm dependencies
+COPY package.json /tmp
+RUN npm i --prefix /tmp
+RUN npm i --quiet -g ganache-cli
 
 # variables
 ARG MAPQUEST_API
@@ -28,12 +29,12 @@ ENV SECRET_KEY=${SECRET_KEY}
 RUN mkdir -p /bulwark/$NODE_ENV
 WORKDIR /bulwark/$NODE_ENV
 
+RUN apt install -y lsof
 # clone back-end
 RUN mkdir -p /bulwark/app
 ARG CACHEBUST=1
 COPY . ./app
-RUN npm i --prefix app
+RUN cp -a /tmp/node_modules ./app
 
 EXPOSE 5000
-
 CMD [ "npm", "run", "bulwark:start", "--prefix", "app" ]

@@ -75,6 +75,7 @@ router.get('/pay', passport.authenticate('jwt', {session: false}), (req, res) =>
                 console.log(`[pay-premium] user not found in DB ${userID}`)
             } else {
                 try {
+                    console.log(`Using address: ${address}`)
                     const receipt          = await payPremium(address)
                     receipt.date           = user.insurance.date
                     receipt.interval       = user.insurance.interval

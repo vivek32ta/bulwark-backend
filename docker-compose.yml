@@ -18,6 +18,7 @@ services:
       - "5000:5000"
     links:
       - mongo
+      - ganache
   mongo:
     container_name: mongo
     image: mongo
@@ -25,3 +26,8 @@ services:
       - /bulwark/mongodb/data:/data/db
     ports:
       - "27018:27017"
+  ganache:
+    container_name: ganache
+    image: trufflesuite/ganache-cli:latest
+    ports:
+      - "8545:8545"
